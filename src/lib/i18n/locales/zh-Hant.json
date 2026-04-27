@@ -1,0 +1,150 @@
+{
+	"common": {
+		"loading": "載入中…",
+		"back": "返回",
+		"next": "下一步",
+		"confirm": "確認",
+		"cancel": "取消",
+		"replay": "再來一次",
+		"play": "開始",
+		"untouched": "未嘗試",
+		"stars_format": "{count} 星"
+	},
+	"home": {
+		"title": "EMT-1 練功房",
+		"subtitle": "用零碎時間練熟出勤流程",
+		"mode_scenario": "情境演練",
+		"mode_technique": "單項技術",
+		"settings_entry": "設定",
+		"about_entry": "關於",
+		"progress_label": "整體進度"
+	},
+	"menu": {
+		"scenarios_title": "情境關卡",
+		"techniques_title": "單項關卡",
+		"empty": "目前沒有可玩的關卡"
+	},
+	"scenario": {
+		"role_select_title": "選擇你的角色",
+		"role_lead": "主手",
+		"role_assist": "副手",
+		"role_carry_label": "攜帶",
+		"role_duty_label": "職責",
+		"phase_progress": "已做",
+		"timer_label": "本階段時間",
+		"narrative_label": "現場狀況",
+		"toolbox_title": "工具箱",
+		"toolbox_bag_not_on_scene": "此袋目前不在場",
+		"toolbox_directive_partner": "指示同伴",
+		"patient_status_title": "病人狀態",
+		"patient_consciousness": "意識",
+		"patient_breath": "呼吸",
+		"patient_pulse": "脈搏",
+		"action_list_title": "目前可用項目",
+		"action_pick_region": "請點選身體部位以查看可做動作",
+		"action_pick_bag": "請選擇器材袋分頁",
+		"back_to_list": "返回場景列表",
+		"show_log": "顯示任務紀錄",
+		"scene_actions_title": "現場安全與勘查",
+		"tab_scene": "現場勘查",
+		"tab_assessment": "患者評估",
+		"tab_toolbox": "急救裝備",
+		"log_title": "任務紀錄",
+		"close_log": "關閉日誌",
+		"no_actions": "此部位目前無可用動作",
+		"general_assessment": "全身評估",
+		"log_empty": "尚無行動紀錄",
+		"log_phase_advance": "階段進展",
+		"log_outcome": "關卡結束",
+		"patient_figure": "病人 stick figure",
+		"head": "頭",
+		"neck": "頸",
+		"chest": "胸",
+		"abdomen": "腹",
+		"arm": "手臂",
+		"wrist": "手腕",
+		"leg": "腿",
+		"status_not_assessed": "尚未評估",
+		"status_skin": "皮膚",
+		"status_glucose": "血糖",
+		"status_spo2": "血氧",
+		"status_bp": "血壓",
+		"zone_head": "頭部",
+		"zone_neck": "頸部",
+		"zone_chest": "胸部",
+		"zone_abdomen": "腹部",
+		"zone_arm": "手臂",
+		"zone_wrist": "手腕",
+		"zone_leg": "腿部",
+		"zone_general": "全身",
+		"item_count": "{count} 個項目"
+	},
+	"technique": {
+		"step_format": "第 {current} 步 / 共 {total} 步",
+		"wrong_count": "錯誤次數:{count}",
+		"tip_label": "提示",
+		"region_picked": "部位：{region}",
+		"use_tool": "使用工具"
+	},
+	"result": {
+		"scenario_title": "演練結算",
+		"technique_title": "單項結算",
+		"correct_rate": "正確率",
+		"errors": "錯誤",
+		"worsen_level": "惡化等級",
+		"timeline_entry": "查看時間軸回顧",
+		"return_menu": "返回選關"
+	},
+	"timeline": {
+		"event_action": "動作",
+		"event_skip": "略過",
+		"event_phase_advance": "進入下一階段",
+		"event_outcome": "結局",
+		"by_player": "玩家",
+		"by_partner": "同伴",
+		"correct": "正確",
+		"incorrect": "錯誤",
+		"flow_error": "流程錯誤"
+	},
+	"settings": {
+		"title": "設定",
+		"clear_progress": "清除全部進度",
+		"clear_progress_confirm_title": "確認清除進度?",
+		"clear_progress_confirm_body": "進度只儲存在你的瀏覽器,清除後無法復原。",
+		"clear_progress_done": "已清除",
+		"about": "關於本專案",
+		"credits": "致謝",
+		"license": "授權"
+	},
+	"about": {
+		"title": "關於 emt-game",
+		"description": "本專案為開源、免費、無後端的 EMT-1 練習工具,由志工貢獻內容與程式。",
+		"contribution_link": "貢獻指南",
+		"github_link": "GitHub 專案頁"
+	},
+	"equipment": {
+		"hand": "徒手",
+		"o2kit": "氧氣組 (O2)",
+		"jumpkit": "救護包 (Jumpkit)",
+		"aed": "AED 電擊器",
+		"vehicle": "救護車器材"
+	},
+	"error": {
+		"validation": {
+			"timeout_too_short": "{field}:逾時秒數過短(目前 {value},最小 5)",
+			"missing_skip_note": "{field}:on_skip 必須填寫 note(說明惡化原因)",
+			"missing_default_outcome": "{field}:outcomes 必須有一個 when=\"預設\" 的兜底結局",
+			"unknown_action": "{field}:找不到動作「{label}」,請檢查 actions.yml",
+			"invalid_bag": "{field}:袋子值「{value}」不合法,合法值為 hand / o2kit / jumpkit / aed / vehicle",
+			"empty_steps": "{field}:steps 不可為空陣列",
+			"locale_map_missing_zh_hant": "{field}:可翻譯欄位必須含 zh-Hant 鍵",
+			"duplicate_id": "{field}:id「{value}」重複",
+			"duplicate_label": "{field}:label「{value}」重複",
+			"empty_id": "{field}:id 必須為非空字串"
+		},
+		"runtime": {
+			"scenario_load_failed": "情境載入失敗:{reason}",
+			"technique_load_failed": "單項載入失敗:{reason}"
+		}
+	}
+}

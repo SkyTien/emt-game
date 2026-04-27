@@ -1,0 +1,124 @@
+# 動作分類層級定義
+# 三層結構: phase（階段）→ category（類別）→ action id
+#
+# 維護說明:
+#   - phase.id / category.id 一旦建立請勿修改，會影響 UI 狀態
+#   - actions 列表填入 actions.yml 中的 action id
+#   - 同一個 action 可以出現在多個 category（例如 check_airway 在初步評估與 CPR 都合理）
+
+phases:
+  - id: routine
+    label: { zh-Hant: 常規 }
+    icon: ShieldCheck
+    categories:
+      - id: scene_safety
+        label: { zh-Hant: 環境安全 }
+        icon: ShieldAlert
+        actions:
+          - check_scene_safe
+          - wear_ppe
+          - scene_traffic_control
+
+      - id: triage
+        label: { zh-Hant: 檢傷分類 }
+        icon: ScanFace
+        actions:
+          - check_consciousness_avpu
+          - call_113_dispatch
+
+  - id: primary
+    label: { zh-Hant: 初步評估 }
+    icon: Activity
+    categories:
+      - id: consciousness
+        label: { zh-Hant: 意識評估 }
+        icon: ScanFace
+        actions:
+          - check_consciousness_avpu
+
+      - id: cervical
+        label: { zh-Hant: 頸椎限制 }
+        icon: Shield
+        actions:
+          - manual_inline_stabilization
+          - cervical_collar_pick_size
+          - cervical_collar_apply
+
+      - id: xabc
+        label: { zh-Hant: X-A-B-C }
+        icon: ClipboardCheck
+        actions:
+          - control_bleeding_pressure   # X 大量出血
+          - check_airway                # A 呼吸道
+          - check_breath                # B 呼吸
+          - check_pulse_carotid         # C 頸動脈
+          - check_pulse_radial          # C 橈動脈
+          - check_skin_signs            # C/E 皮膚
+          - assess_abc
+
+      - id: ancillary
+        label: { zh-Hant: 輔助檢查 }
+        icon: Gauge
+        actions:
+          - measure_spo2
+          - measure_bp
+          - blood_glucose_test
+          - check_pupils
+          - stroke_cps_assess
+          - connect_o2
+          - bvm_ventilate
+
+  - id: critical_decision
+    label: { zh-Hant: 判斷危急度 }
+    icon: AlertCircle
+    categories:
+      - id: decision
+        label: { zh-Hant: 危急判定 }
+        icon: AlertCircle
+        actions:
+          - declare_critical
+          - declare_stable
+
+  - id: secondary
+    label: { zh-Hant: 二度評估 }
+    icon: UserRoundSearch
+    categories:
+      - id: history_taking
+        label: { zh-Hant: 病史詢問 }
+        icon: MessageSquareText
+        actions:
+          - ask_chief_complaint
+          - sample_history
+
+      - id: physical
+        label: { zh-Hant: 身體檢查 }
+        icon: ClipboardCheck
+        actions:
+          - physical_exam
+          - secondary_survey
+
+      - id: cpr_aed
+        label: { zh-Hant: CPR / AED }
+        icon: HeartPulse
+        actions:
+          - cpr_compress_adult
+          - aed_attach
+          - aed_analyze
+          - aed_shock
+
+      - id: treatment
+        label: { zh-Hant: 處置 }
+        icon: Utensils
+        actions:
+          - oral_glucose_give
+          - control_bleeding_pressure
+          - splint_extremity
+          - long_board_immobilize
+
+      - id: transport
+        label: { zh-Hant: 移送 }
+        icon: Truck
+        actions:
+          - isbar_handoff
+          - load_into_ambulance
+          - transport_to_hospital

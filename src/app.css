@@ -1,0 +1,86 @@
+:root {
+	--c-bg: #ffffff;
+	--c-bg-soft: #f4f4f5;
+	--c-text: #18181b;
+	--c-text-soft: #52525b;
+	--c-line: #18181b;
+	--c-accent: #dc2626;
+	--c-o2: #2563eb;
+	--c-border: #d4d4d8;
+	--c-warn-bg: #fee2e2;
+	--c-good: #16a34a;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--c-bg);
+	color: var(--c-text);
+	font-family:
+		system-ui,
+		-apple-system,
+		'PingFang TC',
+		'Microsoft JhengHei',
+		'Noto Sans TC',
+		sans-serif;
+	line-height: 1.5;
+	-webkit-tap-highlight-color: transparent;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+}
+
+a {
+	color: var(--c-accent);
+}
+
+/* 10.7 CSS 濾鏡規則：對外部 CC0 素材統一收斂色調 */
+
+/* 場景插畫：去飽和 + 略暗，保持線稿感 */
+.illustration-scene img,
+.illustration-scene svg {
+	filter: grayscale(0.25) brightness(0.95) contrast(1.05);
+}
+
+/* 結局插畫：依結局類型加色調 */
+.illustration-outcome-good img,
+.illustration-outcome-good svg {
+	filter: grayscale(0.1) brightness(1) saturate(0.9) sepia(0.05);
+}
+
+.illustration-outcome-bad img,
+.illustration-outcome-bad svg {
+	filter: grayscale(0.4) brightness(0.85) contrast(1.1);
+}
+
+/* 動作 icon：純黑線稿處理，統一為 --c-line 色 */
+.action-icon img {
+	filter: brightness(0) saturate(100%);
+}
+
+/* 袋子 icon：依袋子類型加色調疊加 */
+.bag-icon-hand img {
+	filter: brightness(0) saturate(100%);
+}
+.bag-icon-o2kit img {
+	filter: brightness(0) saturate(100%) invert(22%) sepia(97%) saturate(600%) hue-rotate(196deg)
+		brightness(95%);
+}
+.bag-icon-jumpkit img {
+	filter: brightness(0) saturate(100%) invert(15%) sepia(90%) saturate(700%) hue-rotate(350deg)
+		brightness(100%);
+}
+.bag-icon-aed img {
+	filter: brightness(0) saturate(100%) invert(48%) sepia(99%) saturate(600%) hue-rotate(10deg)
+		brightness(105%);
+}
+.bag-icon-vehicle img {
+	filter: brightness(0) saturate(100%) invert(30%) sepia(10%) saturate(200%) brightness(80%);
+}

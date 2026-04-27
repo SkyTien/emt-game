@@ -1,0 +1,335 @@
+# 動作總表 — 涵蓋 1 單項(上頸圈)+ 3 情境(OHCA、機車外傷、低血糖)所需動作。
+# 欄位:
+#   id: 程式內部識別,英文 snake_case
+#   label: 顯示 label,locale map(短文字可用 inline,含半形逗號的長文字一律 block)
+#   bag: hand / o2kit / jumpkit / aed / vehicle
+#   default_role: lead / assist / either(可省略)
+#   body_region: head / neck / chest / wrist / abdomen / leg / arm / general
+#   icon: 路徑(可省)
+#   explain: 時間軸回顧顯示的講解,locale map(可省)
+#
+# 維護者注意:
+#   - id 一旦發布,不可亂改,會破壞既有 YAML 引用
+#   - label.zh-Hant 必須與所有 scenario.required 欄位完全一致
+#   - 新增動作時請補對應的視覺 icon(static/illustrations/actions/<id>.svg)
+
+actions:
+  # === 共通評估 ===
+  - id: check_scene_safe
+    label: { zh-Hant: 評估現場安全 }
+    bag: hand
+    default_role: lead
+    body_region: general
+    icon: ShieldCheck
+    explain:
+      zh-Hant: 「五安一移」中的安全評估,確認交通、瓦斯、墜落等危害排除後再接近病人
+
+  - id: wear_ppe
+    label: { zh-Hant: 戴手套口罩 }
+    bag: hand
+    body_region: general
+    icon: ShieldAlert
+    explain:
+      zh-Hant: BSI:接觸病人前必戴手套口罩
+
+  - id: check_consciousness_avpu
+    label: { zh-Hant: 拍肩呼喚評估意識 AVPU }
+    bag: hand
+    default_role: lead
+    body_region: head
+    icon: ScanFace
+    explain:
+      zh-Hant: A 警覺 / V 對聲音反應 / P 對痛刺激反應 / U 無反應
+
+  - id: check_breath
+    label: { zh-Hant: 看呼吸起伏 }
+    bag: hand
+    default_role: lead
+    body_region: chest
+    icon: Wind
+    explain:
+      zh-Hant: 5~10 秒內判斷有無正常呼吸,異常呼吸視同無呼吸
+
+  - id: check_pulse_carotid
+    label: { zh-Hant: 檢查頸動脈脈搏 }
+    bag: hand
+    default_role: lead
+    body_region: neck
+    icon: Activity
+    explain:
+      zh-Hant: 同步看呼吸測脈搏,5~10 秒內完成
+
+  - id: check_airway
+    label: { zh-Hant: 確認氣道暢通 }
+    bag: hand
+    body_region: neck
+    icon: Wind
+    explain:
+      zh-Hant: 確認是否有異物或壓迫,有無異常呼吸音
+
+  - id: check_skin_signs
+    label: { zh-Hant: 檢查皮膚徵象 }
+    bag: hand
+    body_region: general
+    icon: Thermometer
+    explain:
+      zh-Hant: 評估微循環:檢查體溫（濕冷/溫暖）、色澤（蒼白/發紺/紅潤）
+
+  - id: declare_critical
+    label: { zh-Hant: 判斷為危急個案 }
+    bag: hand
+    body_region: general
+    icon: AlertCircle
+    explain:
+      zh-Hant: 初評完成後,依意識、呼吸、循環異常與否決定是否立即送醫
+
+  - id: declare_stable
+    label: { zh-Hant: 判斷為非危急個案 }
+    bag: hand
+    body_region: general
+    icon: CheckCircle
+    explain:
+      zh-Hant: 初評完成且無危急徵象
+
+  - id: measure_spo2
+    label: { zh-Hant: 量測血氧 }
+    bag: jumpkit
+    body_region: wrist
+    icon: Activity
+    explain:
+      zh-Hant: 測量血氧飽和度 (SpO2),確認有無缺氧
+
+  - id: measure_bp
+    label: { zh-Hant: 量測血壓 }
+    bag: jumpkit
+    body_region: arm
+    icon: Gauge
+    explain:
+      zh-Hant: 測量收縮壓與舒張壓以評估血循狀態
+
+  - id: check_pupils
+    label: { zh-Hant: 檢查瞳孔 }
+    bag: hand
+    body_region: head
+    icon: Eye
+    explain:
+      zh-Hant: 檢查瞳孔大小、對光反應及是否對稱,評估中樞神經狀況
+
+  - id: physical_exam
+    label: { zh-Hant: 全身身體檢查 }
+    bag: hand
+    body_region: general
+    icon: ClipboardCheck
+    explain:
+      zh-Hant: 從頭到腳快速檢查有無其餘傷病、腫脹或壓痛
+
+  - id: sample_history
+    label: { zh-Hant: 詢問 SAMPLE 病史 }
+    bag: hand
+    body_region: general
+    icon: MessageSquareText
+    explain:
+      zh-Hant: 詢問 症狀/過敏/藥物/病史/最後一餐/事件經過
+
+  - id: check_pulse_radial
+    label: { zh-Hant: 檢查橈動脈脈搏 }
+    bag: hand
+    body_region: wrist
+    icon: Activity
+
+  - id: ask_chief_complaint
+    label: { zh-Hant: 詢問主訴 }
+    bag: hand
+    default_role: lead
+    body_region: head
+    icon: MessageCircle
+    explain:
+      zh-Hant: SAMPLE 史:S/A/M/P/L/E,先問主訴與發病經過
+
+  - id: call_113_dispatch
+    label: { zh-Hant: 通報通訊指揮中心 }
+    bag: hand
+    default_role: assist
+    body_region: general
+    icon: PhoneCall
+
+  # === CPR / AED ===
+  - id: cpr_compress_adult
+    label: { zh-Hant: 成人胸外按壓 }
+    bag: hand
+    default_role: lead
+    body_region: chest
+    icon: HeartPulse
+    explain:
+      zh-Hant: 速率 100~120 次/分,深度 5~6 cm,完全回彈,中斷不超過 10 秒
+
+  - id: bvm_ventilate
+    label: { zh-Hant: BVM 給氧通氣 }
+    bag: o2kit
+    default_role: assist
+    body_region: head
+    icon: Air
+    explain:
+      zh-Hant: 30:2 或 10 秒一次(高級氣道下),避免過度通氣
+
+  - id: connect_o2
+    label: { zh-Hant: 接氧氣瓶 }
+    bag: o2kit
+    default_role: assist
+    body_region: general
+    icon: Plug
+
+  - id: aed_attach
+    label: { zh-Hant: 貼 AED 電擊片 }
+    bag: aed
+    default_role: assist
+    body_region: chest
+    icon: Scan
+    explain:
+      zh-Hant: 一片右上鎖骨下、一片左下乳線外,皮膚乾燥、移除金屬與貼片
+
+  - id: aed_analyze
+    label: { zh-Hant: 啟動 AED 分析 }
+    bag: aed
+    default_role: lead
+    body_region: chest
+    icon: Search
+
+  - id: aed_shock
+    label: { zh-Hant: AED 電擊 }
+    bag: aed
+    default_role: lead
+    body_region: chest
+    icon: Zap
+    explain:
+      zh-Hant: 大喊「我清、你清、大家清」,確認無人接觸後按下電擊鈕
+
+  # === 創傷處置 ===
+  - id: manual_inline_stabilization
+    label: { zh-Hant: 徒手固定頭部 }
+    bag: hand
+    default_role: assist
+    body_region: head
+    icon: Hand
+    explain:
+      zh-Hant: 雙手扶住頭兩側保持中立位,直到頸圈套上
+
+  - id: cervical_collar_pick_size
+    label: { zh-Hant: 挑選頸圈尺寸 }
+    bag: jumpkit
+    body_region: neck
+    icon: Ruler
+    explain:
+      zh-Hant: 量下顎到肩膀的指距(通常 2~4 指),選對應頸圈
+
+  - id: cervical_collar_apply
+    label: { zh-Hant: 套上頸圈 }
+    bag: jumpkit
+    default_role: lead
+    body_region: neck
+    icon: Shield
+    explain:
+      zh-Hant: 由下往上套,後片先就位、前片包覆固定,黏扣帶確實貼緊
+
+  - id: scene_traffic_control
+    label: { zh-Hant: 設置現場警示 }
+    bag: vehicle
+    default_role: assist
+    body_region: general
+    icon: Construction
+    explain:
+      zh-Hant: 警示燈、三角錐、引導圍觀群眾後退,避免二次事故
+
+  - id: control_bleeding_pressure
+    label: { zh-Hant: 直接加壓止血 }
+    bag: jumpkit
+    body_region: leg
+    icon: Droplet
+    explain:
+      zh-Hant: 紗布或乾淨布料覆蓋傷口,以掌根直接加壓
+
+  - id: splint_extremity
+    label: { zh-Hant: 副木固定肢體 }
+    bag: jumpkit
+    body_region: leg
+    icon: Bone
+    explain:
+      zh-Hant: 固定範圍涵蓋傷處上下兩個關節
+
+  - id: long_board_immobilize
+    label: { zh-Hant: 上長背板 }
+    bag: jumpkit
+    default_role: lead
+    body_region: general
+    icon: StretchHorizontal
+    explain:
+      zh-Hant: 維持脊椎中立位翻身上板,綁帶順序:胸→骨盆→大腿→小腿→頭
+
+  - id: assess_abc
+    label: { zh-Hant: 快速 ABC 評估 }
+    bag: hand
+    default_role: lead
+    body_region: general
+    icon: ClipboardCheck
+    explain:
+      zh-Hant: A 暢通 / B 呼吸 / C 循環,3 秒內排序威脅生命的問題
+
+  - id: secondary_survey
+    label: { zh-Hant: 二度評估全身 }
+    bag: hand
+    body_region: general
+    icon: UserRoundSearch
+    explain:
+      zh-Hant: 從頭到腳系統性觸診、視診,搜尋隱性出血或骨折
+
+  # === 內科判讀 ===
+  - id: blood_glucose_test
+    label: { zh-Hant: 量血糖 }
+    bag: jumpkit
+    default_role: lead
+    body_region: wrist
+    icon: Droplet
+    explain:
+      zh-Hant: 意識改變病人應 routine 量血糖,小於 60 mg/dL 即視為低血糖
+
+  - id: stroke_cps_assess
+    label: { zh-Hant: 辛辛那提中風指標 CPSS }
+    bag: hand
+    default_role: lead
+    body_region: head
+    icon: Brain
+    explain:
+      zh-Hant: 臉部 / 肢體 / 言語三項中有一項異常就視為中風,須先排除低血糖
+
+  - id: oral_glucose_give
+    label: { zh-Hant: 口服葡萄糖 }
+    bag: jumpkit
+    default_role: lead
+    body_region: head
+    icon: Utensils
+    explain:
+      zh-Hant: 病人意識清楚且能吞嚥才可給予,昏迷者禁口服
+
+  # === ISBAR / 移送 ===
+  - id: isbar_handoff
+    label: { zh-Hant: ISBAR 交班 }
+    bag: hand
+    default_role: lead
+    body_region: general
+    icon: MessageSquareQuote
+    explain:
+      zh-Hant: I 自我介紹 / S 病情 / B 病史 / A 評估 / R 建議,清楚簡潔
+
+  - id: load_into_ambulance
+    label: { zh-Hant: 移送上救護車 }
+    bag: vehicle
+    default_role: lead
+    body_region: general
+    icon: Ambulance
+
+  - id: transport_to_hospital
+    label: { zh-Hant: 送醫 }
+    bag: vehicle
+    default_role: lead
+    body_region: general
+    icon: Hospital

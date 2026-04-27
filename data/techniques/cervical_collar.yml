@@ -1,0 +1,33 @@
+id: cervical_collar
+schema_version: 1
+title: { zh-Hant: 上頸圈 }
+description:
+  zh-Hant: 為疑似頸椎傷患套上頸圈,避免次發性脊髓損傷
+body_region: neck
+illustration: /illustrations/scenes/cervical_collar.png
+
+steps:
+  - id: ppe
+    action: 戴手套口罩
+    tip:
+      zh-Hant: BSI 為所有接觸病人前的標準動作
+
+  - id: stabilize
+    action: 徒手固定頭部
+    tip:
+      zh-Hant: 副手雙手扶住病人頭兩側,維持中立位,直到頸圈完全固定
+
+  - id: assess_neck
+    action: 二度評估全身
+    tip:
+      zh-Hant: 套頸圈前先檢查頸部:腫脹、變形、皮下氣腫、氣管偏移
+
+  - id: pick_size
+    action: 挑選頸圈尺寸
+    tip:
+      zh-Hant: 病人下顎到斜方肌頂端的指距,選對應頸圈
+
+  - id: apply
+    action: 套上頸圈
+    tip:
+      zh-Hant: 後片先就位、前片包覆,確認下巴落在凹槽,黏扣帶確實貼緊

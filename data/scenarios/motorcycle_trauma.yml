@@ -1,0 +1,134 @@
+id: motorcycle_trauma
+schema_version: 1
+title: { zh-Hant: 交通事故救護 }
+illustration: /illustrations/scenes/motorcycle_trauma.png
+player_role: either
+
+patient_initial:
+  consciousness: { zh-Hant: 嗜睡可喚醒 }
+  breath: { zh-Hant: 略淺快 }
+  pulse: { zh-Hant: 110 弱 }
+
+crew:
+  lead:
+    role: lead
+    carries: [jumpkit]
+    duty:
+      zh-Hant: 主導評估、長背板、ISBAR
+  assist:
+    role: assist
+    carries: [o2kit]
+    duty:
+      zh-Hant: 徒手固定頭部、止血、紀錄
+
+phases:
+  - id: scene_control
+    illustration: /illustrations/scenes/motorcycle_trauma.png
+    narrative:
+      zh-Hant: 雙線道公路上，一輛機車倒地，30 多歲男性駕駛仰躺路面，頭盔已脫落，現場車流仍未完全管制。
+    hint:
+      zh-Hant: 在接觸病人前，應優先管制現場交通秩序並做好 BSI 自我防護。
+    required:
+      - { action: 評估現場安全 }
+      - { action: 設置現場警示 }
+      - { action: 戴手套口罩 }
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未管制現場,後方來車可能造成二次事故。
+
+  - id: c_spine
+    narrative:
+      zh-Hant: 根據事故機制分析，病人有高度頸椎損傷風險。
+    hint:
+      zh-Hant: 應先穩定頭頸部（徒手固定）避免脊髓損傷，並評估患者的基本意識程度。
+    required:
+      - { action: 徒手固定頭部, by: partner }
+      - { action: 拍肩呼喚評估意識 AVPU }
+    timeout: 30
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 沒固定頸椎就移動病人,可能造成脊髓損傷。
+
+  - id: abc
+    narrative:
+      zh-Hant: 病人雖然有反應但顯得相當嗜睡，處於危急狀態。
+    hint:
+      zh-Hant: 應快速執行 ABC 評估，並立即給予高濃度氧氣治療。
+    required:
+      - { action: 快速 ABC 評估 }
+      - { action: 接氧氣瓶, by: partner }
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 創傷病人未及時給高濃度氧,組織灌流惡化。
+
+  - id: bleeding_splint
+    narrative:
+      zh-Hant: 檢查發現病人右大腿外側有大片出血，且右小腿呈現明顯變形。
+    hint:
+      zh-Hant: 應先針對活動性出血進行止血處理，並對骨折部位進行固定以減少二次傷。
+    required:
+      - { action: 二度評估全身 }
+      - { action: 直接加壓止血 }
+      - { action: 副木固定肢體 }
+    timeout: 90
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 未及時止血與固定,出血性休克進展。
+
+  - id: collar_board
+    narrative:
+      zh-Hant: 出血已初步控制，準備進行長距離移送前的固定。
+    hint:
+      zh-Hant: 應先為病人套上合適尺寸的頸圈，隨後實施長背板固定以保護脊椎。
+    required:
+      - { action: 挑選頸圈尺寸 }
+      - { action: 套上頸圈 }
+      - { action: 上長背板 }
+    timeout: 90
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 脊椎固定不確實,移送途中變形。
+
+  - id: transport
+    narrative:
+      zh-Hant: 病人已完成初步固定，正準備啟程前往外傷中心。
+    hint:
+      zh-Hant: 將病人移上救護車並全速送醫，途中應維持生命徵象監測並準備 ISBAR 交班。
+    required:
+      - { action: 移送上救護車 }
+      - { action: 送醫 }
+      - { action: ISBAR 交班 }
+    timeout: 60
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 送醫延遲、交班不完整。
+
+outcomes:
+  - id: stable
+    when: 正確率>=0.85 且 惡化等級<2
+    title: { zh-Hant: 病人到院時生命徵象穩定 }
+    text:
+      zh-Hant: 完整的脊椎固定與及時止血,病人送達外傷中心時意識回復、循環穩定。
+    illustration: /illustrations/outcomes/stable.png
+
+  - id: hemorrhagic_shock
+    when: 惡化等級>=2
+    title: { zh-Hant: 到院時出血性休克 }
+    text:
+      zh-Hant: 多項延誤導致病人到院時呈現休克。請回看時間軸找出可以更快處理的環節。
+    illustration: /illustrations/outcomes/shock.png
+
+  - id: bad_handoff
+    when: 預設
+    title: { zh-Hant: 到院後仍需密切觀察 }
+    text:
+      zh-Hant: 雖然到院但流程不夠完整。請再來一次精進。
+    illustration: /illustrations/outcomes/handoff.png

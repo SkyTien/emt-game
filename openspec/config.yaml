@@ -1,0 +1,93 @@
+schema: spec-driven
+
+context: |
+  # 專案目的
+  EMT1 訓練場:以遊戲化方式幫助學員熟悉台灣初級救護技術員(EMT-1)
+  的單項技術與到院前救護情境流程。內容來源以 https://www.anne.education/technology.html
+  與 https://apan1121.github.io/EMT1Note/ 為參考,最終以教學審稿人(PO)把關的內容為準。
+
+  # 目標使用者
+  - 主要:EMT-1 考生與在職救護員、教學老師
+  - 公開分享,任何人開網址即玩,無需帳號
+
+  # 遊戲玩法總覽
+  - 兩大模式:單項技術模式、情境模式
+  - 情境模式:連續劇情自動推進,遇到決策點暫停等玩家動作;玩家做錯不會立即死亡,
+    但病人狀態會惡化,最終由累積狀態決定結局(ROSC / 送醫救回 / 惡化 / 失敗)
+  - 決策不採 4 選 1:玩家透過「身體部位點擊」與「器材袋分頁」操作,
+    必須靠記憶判斷當下該做什麼
+  - 情境可扮演主手或副手,兩種視角與工具權限不同
+  - 單項模式:依正確順序逐步點選動作,錯誤計數影響 1~3 星等級
+
+  # 技術棧
+  - 前端框架:Svelte 5 + SvelteKit(static adapter)
+  - 語言:TypeScript
+  - 打包:Vite(SvelteKit 內建)
+  - 測試:Vitest(單元測試)、Playwright(少量 E2E smoke test)
+  - 內容格式:YAML(情境、單項、動作總表),非工程師可直接讀寫
+  - 樣式:原生 CSS + SvelteKit scoped styles,無 CSS-in-JS
+  - 部署:GitHub Pages(純靜態、無後端)
+  - CI/CD:GitHub Actions(測試 + 資料驗證 + 自動發佈)
+  - 狀態保存:瀏覽器 localStorage(無帳號、不跨裝置)
+
+  # 架構原則
+  - 三層分離:UI 層(Svelte) / 引擎層(純 TS) / 內容層(YAML)
+  - 引擎必須無 UI 依賴,純函數式狀態機,可獨立 unit test
+  - 內容與程式碼嚴格分離:新增關卡只改 YAML,不動 TS
+  - 所有可執行動作集中定義於 data/actions.yml(單一真相來源)
+  - 情境啟動前硬性驗證 YAML(timeout ≥ 5 秒、on_skip 必備 note、outcomes 覆蓋完整等),
+    內容錯誤在 build/啟動階段就擋下,不讓玩家玩到一半才壞
+
+  # 出勤模型(EMT-1 實務)
+  - 標準編組 2 人:主手(lead)、副手(assist)
+  - 三寶袋子 + 徒手 + 車上器材,共 5 類動作來源:
+    - 徒手/評估(hand,無裝備需求)
+    - 三合一氧氣(o2kit)
+    - 急救包(jumpkit)
+    - AED(aed)
+    - 車上器材(vehicle,長背板/頸圈/擔架等)
+  - 每位隊員出勤時指定攜帶哪個袋子;動作要可執行必須「所需袋子在病人旁」
+  - 玩家扮演角色時,對方由 AI 自動做明顯該做的事,其他等玩家指示
+
+  # UI 原則
+  - RWD,桌機與手機皆可,主要操作場景是手機單手直拿
+  - 視覺風格:stick figure 線條插畫,簡單可愛;允許混用 AI 生成與免費圖庫
+    (unDraw、Iconify、Open Peeps、SVG Repo 等 CC0/MIT 素材)
+  - 動畫僅做 CSS/SVG 原生支援的:呼吸起伏、狀態惡化閃紅、旁白打字機、場景淡入淡出
+  - 介面主要文字:繁體中文
+  - 情境模式核心互動:可點擊的 stick figure 病人身體部位(頭/頸/胸/手腕/四肢),
+    點了才展開該部位可做的評估或處置;避免一次列出大量動作造成隱性提示
+
+  # 內容治理
+  - 所有情境/單項 YAML 必須通過審稿才可合併;PR 範本需填「資料來源」與「審稿者」
+  - 劇情惡化事件需醫學合理:只能是實際會發生的後果,不可有不合理因果
+  - 不做筆試題庫、排行榜、多語系、音效(MVP 範圍外)
+
+  # MVP 範圍
+  - 1 個單項:上頸圈
+  - 3 個情境:
+    - 路倒成人 OHCA(OHCA 流程)
+    - 機車事故多重外傷(創傷處理)
+    - 低血糖合併意識改變(非創傷 + 中風指標排除)
+
+rules:
+  proposal:
+    - 寫清楚「為什麼做 MVP 這幾個情境/單項」,而非列出所有 EMT1 題目
+    - 點出此次變更是 greenfield 初始化(第一次建立完整專案骨架)
+    - 能力(Capabilities)用 kebab-case,且命名貼近遊戲概念(例:scenario-engine、technique-engine、action-registry、body-interaction-ui)
+  design:
+    - 引擎與 UI 介面契約要明確;引擎輸入輸出型別與純度需說清楚
+    - 所有「資料驗證規則」要列出(timeout 下限、on_skip 必填欄位、outcomes 完整性等)
+    - 指明哪些部分是 MVP 必做、哪些是 Phase 2 可延後
+    - 插畫素材策略寫清楚:允許 AI/免費圖庫混搭,但如何統一視覺(例:CSS 濾鏡套色)
+  specs:
+    - 需求用 Given/When/Then 格式寫 scenarios
+    - 每個 capability 聚焦單一職責,跨能力互動用介面而非隱含耦合
+    - 引擎類能力(scenario-engine、technique-engine)要能被純函數測試,
+      scenarios 內的 Given/When/Then 必須能映射到 Vitest 單元測試
+    - 內容格式(YAML schema)要寫成「所見即所得」範例,讓非工程師能依樣畫葫蘆
+  tasks:
+    - 用實作順序排列:scaffold → 引擎與資料驗證 → UI 骨架 → 內容 → 美化動畫 → 部署
+    - 每項任務可獨立完成並有明確完成定義(可被測試/目視驗證)
+    - 包含「資料審稿」為內容關卡的前置任務,確保劇情合理性把關到位
+    - 標示哪些任務屬於 MVP 必做、哪些可排到 Phase 2
