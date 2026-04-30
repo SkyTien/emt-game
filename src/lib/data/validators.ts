@@ -156,7 +156,8 @@ function validateRequiredEntries(
 	requiredRaw: unknown,
 	field: string,
 	registry: ActionRegistry,
-	errors: ValidationError[]
+	errors: ValidationError[],
+	_warnings: ValidationWarning[]
 ): void {
 	if (!Array.isArray(requiredRaw)) {
 		pushError(errors, field, 'invalid_type', `${field}: required 必須為陣列`);
@@ -164,28 +165,28 @@ function validateRequiredEntries(
 	}
 	requiredRaw.forEach((entry, i) => {
 		const subField = `${field}[${i}]`;
-		let label: string | undefined;
-		if (typeof entry === 'string') label = entry;
-		else if (entry && typeof entry === 'object') {
-			const obj = entry as { action?: unknown };
-			if (typeof obj.action === 'string') label = obj.action;
-		}
-		if (!label) {
-			pushError(
-				errors,
-				subField,
-				'invalid_type',
-				`${subField}: 必須為動作中文 label 或 { action }`
-			);
+
+		if (typeof entry !== 'object' || !entry) {
+			pushError(errors, subField, 'invalid_type', `${subField}: 必須為物件`);
 			return;
 		}
-		if (!registry.tryResolve(label)) {
+
+		const obj = entry as { action_id?: unknown };
+		if (typeof obj.action_id !== 'string' || obj.action_id.length === 0) {
+			pushError(errors, subField, 'invalid_type', `${subField}: 必須含非空 action_id`);
+			return;
+		}
+
+		// Verify action exists
+		try {
+			registry.byId(obj.action_id);
+		} catch {
 			pushError(
 				errors,
 				subField,
 				'unknown_action',
-				`${subField}: 找不到動作「${label}」,請檢查 actions.yml`,
-				label
+				`${subField}: 找不到動作「${obj.action_id}」`,
+				obj.action_id
 			);
 		}
 	});
@@ -242,7 +243,7 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 				phaseIds.add(id);
 			}
 			ensureLocalized(p.narrative, `${path}.narrative`, errors, warnings);
-			validateRequiredEntries(p.required, `${path}.required`, registry, errors);
+			validateRequiredEntries(p.required, `${path}.required`, registry, errors, warnings);
 			if (p.timeout !== undefined) {
 				if (typeof p.timeout !== 'number' || p.timeout < 5) {
 					pushError(
@@ -336,15 +337,23 @@ export function validateTechnique(input: unknown, registry: ActionRegistry): Val
 				}
 				stepIds.add(id);
 			}
-			if (typeof step.action !== 'string' || step.action.length === 0) {
-				pushError(errors, `${path}.action`, 'empty', `${path}.action: 必須為非空動作 label`);
-			} else if (!registry.tryResolve(step.action)) {
+			// Check for action_id field
+			const s = step as { action_id?: unknown };
+			if (typeof s.action_id !== 'string' || s.action_id.length === 0) {
+				pushError(errors, `${path}`, 'missing_action', `${path}: 必須含非空 action_id`);
+				return;
+			}
+
+			// Verify action exists
+			try {
+				registry.byId(s.action_id);
+			} catch {
 				pushError(
 					errors,
-					`${path}.action`,
+					`${path}`,
 					'unknown_action',
-					`${path}.action: 找不到動作「${step.action}」,請檢查 actions.yml`,
-					step.action
+					`${path}: 找不到動作「${s.action_id}」,請檢查 actions.yml`,
+					s.action_id
 				);
 			}
 			if (step.tip !== undefined) {

@@ -66,7 +66,7 @@ title: 路倒成人 OHCA
 | 欄位           | 必填 | 說明                                                                    |
 | -------------- | ---- | ----------------------------------------------------------------------- |
 | `id`           | ✓    | 英文 snake_case，**發布後不可改**（避免破壞情境引用）                   |
-| `label`        | ✓    | 顯示名稱，LocalizedString；需與情境 `required.action` 完全一致          |
+| `label`        | ✓    | 顯示名稱，LocalizedString；用於 UI 呈現與回溯相容性                     |
 | `bag`          | ✓    | 所在器材袋：`hand / o2kit / jumpkit / aed / vehicle`                    |
 | `default_role` |      | 預設執行角色：`lead / assist / either`（省略視為 either）               |
 | `body_region`  |      | 身體部位：`head / neck / chest / wrist / abdomen / leg / arm / general` |
@@ -111,11 +111,12 @@ title: 路倒成人 OHCA
 
 ### steps 欄位
 
-| 欄位     | 必填 | 說明                                    |
-| -------- | ---- | --------------------------------------- |
-| `id`     | ✓    | 步驟識別符，英文，穩定不可改            |
-| `action` | ✓    | 對應 `actions.yml` 中的 `label.zh-Hant` |
-| `tip`    |      | LocalizedString，錯誤 ≥2 次才顯示       |
+| 欄位        | 必填 | 說明                                             |
+| ----------- | ---- | ------------------------------------------------ |
+| `id`        | ✓    | 步驟識別符，英文，穩定不可改                     |
+| `action_id` | ✓    | **新**：對應 `actions.yml` 中的 `id`（推薦用法） |
+| `action`    |      | **已棄用**：中文 label（向後相容，不推薦用法）   |
+| `tip`       |      | LocalizedString，錯誤 ≥2 次才顯示                |
 
 ### 完整範例
 
@@ -130,17 +131,17 @@ illustration: /illustrations/scenes/bvm.svg
 
 steps:
   - id: ppe
-    action: 戴手套口罩
+    action_id: put_on_gloves_mask # 推薦：使用 action_id
     tip:
       zh-Hant: BSI 為所有接觸病人前的標準動作
 
   - id: position_mask
-    action: 固定面罩位置
+    action_id: position_mask_ec # 推薦：使用 action_id
     tip:
       zh-Hant: EC 手法固定，確保密封
 
   - id: squeeze_bag
-    action: BVM 給氧通氣
+    action_id: bvm_ventilation # 推薦：使用 action_id
     tip:
       zh-Hant: 擠壓 1 秒，觀察胸部起伏，每 6 秒一次
 ```
@@ -180,12 +181,14 @@ steps:
 
 ```yaml
 required:
-  - { action: 成人胸外按壓, by: player } # 只有玩家可執行
-  - { action: 通報通訊指揮中心, by: partner } # 由同伴 AI 執行
-  - { action: 貼 AED 電擊片 } # 任何人皆可
-  - { action: AED 電擊, set_flag: 已電擊 } # 完成後設定旗標，用於 outcome 條件
+  - { action_id: cpr_adult, by: player } # 只有玩家可執行
+  - { action_id: call_dispatch, by: partner } # 由同伴 AI 執行
+  - { action_id: aed_pads } # 任何人皆可
+  - { action_id: aed_shock, set_flag: 已電擊 } # 完成後設定旗標，用於 outcome 條件
 ```
 
+- `action_id`: **推薦**，對應 `actions.yml` 的 `id`
+- `action`: **已棄用**，舊版本 (Chinese label)，需運行遷移指令更新
 - `by`: `player / partner`（省略表示任何人）
 - `set_flag`: 完成後設定一個旗標，供 `outcomes[].when` 條件使用
 
@@ -238,8 +241,8 @@ phases:
   - id: assess
     narrative: { zh-Hant: 病人倒臥在客廳，家屬在旁哭泣。 }
     required:
-      - { action: 評估現場安全 }
-      - { action: 戴手套口罩 }
+      - { action_id: assess_safety }
+      - { action_id: put_on_gloves_mask }
     timeout: 30
     on_skip:
       worsen: 1
@@ -248,8 +251,8 @@ phases:
   - id: cpr
     narrative: { zh-Hant: 確認無脈搏，立即 CPR。 }
     required:
-      - { action: 成人胸外按壓, by: player }
-      - { action: AED 電擊, set_flag: 已電擊 }
+      - { action_id: cpr_adult, by: player }
+      - { action_id: aed_shock, set_flag: 已電擊 }
     timeout: 60
     on_skip:
       worsen: 2
@@ -279,13 +282,13 @@ npm run validate:content
 
 ### 常見錯誤訊息
 
-| 錯誤訊息                                     | 原因                                               | 解法                                    |
-| -------------------------------------------- | -------------------------------------------------- | --------------------------------------- |
-| `找不到動作「xxx」`                          | scenario/technique 引用的動作在 actions.yml 找不到 | 確認 label 文字完全一致（含空格與標點） |
-| `可翻譯欄位必須含 zh-Hant 鍵`                | 使用純字串而非 locale map                          | 改為 `{ zh-Hant: "..." }`               |
-| `逾時秒數過短`                               | timeout < 5                                        | 調高 timeout                            |
-| `outcomes 必須有一個 when="預設" 的兜底結局` | 少了兜底 outcome                                   | 在最後加 `when: 預設` 的 outcome        |
-| `id 重複`                                    | 同一檔案內 id 重複                                 | 修改其中一個 id                         |
+| 錯誤訊息                                     | 原因                                               | 解法                                           |
+| -------------------------------------------- | -------------------------------------------------- | ---------------------------------------------- |
+| `找不到動作「xxx」`                          | scenario/technique 引用的動作在 actions.yml 找不到 | 確認 action_id 與 actions.yml 中的 id 完全一致 |
+| `可翻譯欄位必須含 zh-Hant 鍵`                | 使用純字串而非 locale map                          | 改為 `{ zh-Hant: "..." }`                      |
+| `逾時秒數過短`                               | timeout < 5                                        | 調高 timeout                                   |
+| `outcomes 必須有一個 when="預設" 的兜底結局` | 少了兜底 outcome                                   | 在最後加 `when: 預設` 的 outcome               |
+| `id 重複`                                    | 同一檔案內 id 重複                                 | 修改其中一個 id                                |
 
 ---
 

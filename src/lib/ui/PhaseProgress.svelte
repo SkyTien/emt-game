@@ -7,7 +7,7 @@
 <div class="phase-progress" aria-label={`${done}/${total}`}>
 	<span class="label">{$_('scenario.phase_progress')}</span>
 	<span class="dots">
-		{#each Array(total) as _, i (i)}
+		{#each Array.from({ length: total }) as _, i (i)}
 			<span class="dot" class:filled={i < done}>{i < done ? '▪' : '□'}</span>
 		{/each}
 	</span>

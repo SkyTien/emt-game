@@ -1,4 +1,5 @@
 import type { LocalizedString, Technique, TechniqueStep } from '$lib/types/content';
+import { getRegistry } from '$lib/data/content';
 
 export type TechniqueState = {
 	technique: Technique;
@@ -33,7 +34,7 @@ export const TechniqueEngine = {
 
 	performAction(
 		state: TechniqueState,
-		actionLabel: string
+		actionIdOrLabel: string
 	): {
 		state: TechniqueState;
 		feedback: TechniqueFeedback;
@@ -44,12 +45,27 @@ export const TechniqueEngine = {
 		const step = TechniqueEngine.currentStep(state);
 		if (!step) return { state, feedback: { correct: false } };
 
+		// Get step ID
+		const stepId = step.action_id;
+
+		// Try ID match first, then resolve via registry if provided input is a label
+		let isMatch = stepId === actionIdOrLabel;
+		if (!isMatch) {
+			try {
+				const registry = getRegistry();
+				const action = registry.byId(actionIdOrLabel);
+				isMatch = stepId === action.id;
+			} catch {
+				// Unknown action; treat as incorrect
+			}
+		}
+
 		const next: TechniqueState = {
 			...state,
 			wrongTriesPerStep: [...state.wrongTriesPerStep]
 		};
 
-		if (step.action === actionLabel) {
+		if (isMatch) {
 			next.stepIndex += 1;
 			next.finished = next.stepIndex >= state.technique.steps.length;
 			return { state: next, feedback: { correct: true, finished: next.finished } };

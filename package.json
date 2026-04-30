@@ -12,6 +12,7 @@
 		"test:e2e": "playwright test",
 		"typecheck": "node --import tsx/esm node_modules/.bin/svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"validate:content": "tsx scripts/validate-content.ts",
+		"generate:action-ref": "tsx scripts/generate-action-reference.ts",
 		"lint:i18n": "tsx scripts/i18n-lint.ts",
 		"lint": "eslint . && prettier --check . && npm run lint:i18n",
 		"format": "prettier --write ."
@@ -21,10 +22,11 @@
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
-		"@types/node": "^22.10.0",
+		"@types/node": "^22.19.17",
 		"eslint": "^9.16.0",
 		"eslint-plugin-svelte": "^2.46.0",
 		"globals": "^15.13.0",
+		"jiti": "^2.6.1",
 		"jsdom": "^25.0.1",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.2",
@@ -39,7 +41,7 @@
 	"dependencies": {
 		"date-fns": "^4.1.0",
 		"lucide-svelte": "^1.0.1",
-		"svelte-i18n": "^3.7.1",
+		"svelte-i18n": "^4.0.1",
 		"yaml": "^2.6.1"
 	}
 }

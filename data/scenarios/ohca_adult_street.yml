@@ -1,26 +1,30 @@
 id: ohca_adult_street
 schema_version: 1
-title: { zh-Hant: 路倒成人救護 }
+title:
+  zh-Hant: 路倒成人救護
 illustration: /illustrations/scenes/ohca_adult_street.png
 player_role: either
-
 patient_initial:
-  consciousness: { zh-Hant: 無反應 }
-  breath: { zh-Hant: 偶發喘息 }
-  pulse: { zh-Hant: 摸不到 }
-
+  consciousness:
+    zh-Hant: 無反應
+  breath:
+    zh-Hant: 偶發喘息
+  pulse:
+    zh-Hant: 摸不到
 crew:
   lead:
     role: lead
-    carries: [aed, jumpkit]
+    carries:
+      - aed
+      - jumpkit
     duty:
       zh-Hant: 評估、CPR、AED 操作、ISBAR 交班
   assist:
     role: assist
-    carries: [o2kit]
+    carries:
+      - o2kit
     duty:
       zh-Hant: BVM 通氣、通報、紀錄、AED 黏貼
-
 phases:
   - id: arrival
     illustration: /illustrations/scenes/ohca_adult_street.png
@@ -29,92 +33,92 @@ phases:
     hint:
       zh-Hant: 現場有民眾聚集，應優先確保評估現場安全並做好 BSI 防護。
     required:
-      - { action: 評估現場安全 }
-      - { action: 戴手套口罩 }
+      - action_id: check_scene_safe
+      - action_id: wear_ppe
     timeout: 30
     on_skip:
       worsen: 1
       note:
         zh-Hant: 沒先評估安全直接接觸,救護員自身可能受傷;BSI 也漏了。
-
   - id: assess
     narrative:
       zh-Hant: 病人臉色蒼白、嘴唇發紺，對外部呼喚似乎沒有動作。
     hint:
       zh-Hant: 請依照流程評估患者意識(AVPU)，並同時檢查呼吸與頸動脈脈搏。
     required:
-      - { action: 拍肩呼喚評估意識 AVPU }
-      - { action: 看呼吸起伏 }
-      - { action: 檢查頸動脈脈搏 }
+      - action_id: check_consciousness_avpu
+      - action_id: check_breath
+      - action_id: check_pulse_carotid
     timeout: 30
     on_skip:
       worsen: 1
       note:
         zh-Hant: 評估時間拖太久,延誤後續高品質 CPR。
-
   - id: cpr
     narrative:
       zh-Hant: 確認患者無脈搏且無正常呼吸，已進入心肺停止狀態。
     hint:
       zh-Hant: 應立即開始高品質胸外按壓，並與夥伴搭配 BVM 給氧。
     required:
-      - { action: 成人胸外按壓, by: player }
-      - { action: 通報通訊指揮中心, by: partner }
-      - { action: BVM 給氧通氣, by: partner }
+      - action_id: cpr_compress_adult
+        by: player
+      - action_id: call_113_dispatch
+        by: partner
+      - action_id: bvm_ventilate
+        by: partner
     timeout: 60
     on_skip:
       worsen: 2
       note:
         zh-Hant: 每延遲 1 分鐘 CPR 存活率下降 7~10%。
-
   - id: aed
     narrative:
       zh-Hant: 自動體外心臟電擊去顫器 (AED) 已送達。
     hint:
       zh-Hant: 應在減少按壓中斷的前提下，儘速貼上電擊片並啟動分析。
     required:
-      - { action: 貼 AED 電擊片 }
-      - { action: 啟動 AED 分析 }
-      - { action: AED 電擊, set_flag: 已電擊 }
+      - action_id: aed_attach
+      - action_id: aed_analyze
+      - action_id: aed_shock
+        set_flag: 已電擊
     timeout: 60
     on_skip:
       worsen: 2
       note:
         zh-Hant: AED 操作延遲導致除顫時機錯過,VF 自行轉成 asystole。
-
   - id: handoff
     narrative:
       zh-Hant: 病人已移送至救護車，正全速趕往醫院中。
     hint:
       zh-Hant: 途中應持續施作高品質處置，並準備 ISBAR 向急診室交班。
     required:
-      - { action: 移送上救護車 }
-      - { action: 送醫 }
-      - { action: ISBAR 交班 }
+      - action_id: load_into_ambulance
+      - action_id: transport_to_hospital
+      - action_id: isbar_handoff
     timeout: 60
     on_skip:
       worsen: 1
       note:
         zh-Hant: 交班不完整,急診接手延誤後續處置。
-
 outcomes:
   - id: rosc
     when: 正確率>=0.9 且 已電擊
-    title: { zh-Hant: ROSC — 病人恢復自主循環 }
+    title:
+      zh-Hant: ROSC — 病人恢復自主循環
     text:
       zh-Hant: 在你高品質的 CPR 與適時除顫下,病人恢復自主循環,送醫後神經功能完整。
     illustration: /illustrations/outcomes/rosc.png
-
   - id: continued_cpr
     when: 已電擊
-    title: { zh-Hant: 持續 CPR 送醫 }
+    title:
+      zh-Hant: 持續 CPR 送醫
     text:
       zh-Hant: 雖然到院前未恢復循環,但持續高品質 CPR 與電擊讓急診有機會接手。
     illustration: /illustrations/outcomes/cpr.png
-
   - id: doa
     when: 預設
-    title: { zh-Hant: 到院前 DOA }
+    title:
+      zh-Hant: 到院前 DOA
     text:
       zh-Hant: 多項關鍵動作延誤,病人到院前無生命徵象。請檢視時間軸看哪些步驟可以更快。
     illustration: /illustrations/outcomes/doa.png

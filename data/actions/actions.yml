@@ -179,6 +179,15 @@ actions:
     body_region: general
     icon: Plug
 
+  - id: nasal_cannula_oxygen
+    label: { zh-Hant: 鼻管給氧 }
+    bag: o2kit
+    default_role: assist
+    body_region: head
+    icon: Air
+    explain:
+      zh-Hant: 將鼻管置於患者鼻腔，給予低濃度氧氣，流量通常 1~4 L/min
+
   - id: aed_attach
     label: { zh-Hant: 貼 AED 電擊片 }
     bag: aed

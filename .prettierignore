@@ -3,3 +3,6 @@ build/
 .svelte-kit/
 package-lock.json
 data/**/*.yml
+openspec/
+.claude/
+.agent/

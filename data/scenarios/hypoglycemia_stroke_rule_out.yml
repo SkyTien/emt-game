@@ -1,30 +1,39 @@
 id: hypoglycemia_stroke_rule_out
 schema_version: 1
-title: { zh-Hant: 室內長者救護 }
+title:
+  zh-Hant: 室內長者救護
 illustration: /illustrations/scenes/indoor_hypoglycemia_wide.png
 player_role: either
-
 patient_initial:
-  consciousness: { zh-Hant: 嗜睡、口齒不清 }
-  breath: { zh-Hant: 18 次/分, 略淺 }
-  pulse: { zh-Hant: 96 次/分, 規律 }
-  skin: { zh-Hant: 蒼白、濕冷、冒冷汗 }
-  glucose: { zh-Hant: 45 mg/dL }
-  spO2: { zh-Hant: 96% }
-  bp: { zh-Hant: 105/65 mmHg }
-
+  consciousness:
+    zh-Hant: 嗜睡、口齒不清
+  breath:
+    zh-Hant: 18 次/分
+    略淺: null
+  pulse:
+    zh-Hant: 96 次/分
+    規律: null
+  skin:
+    zh-Hant: 蒼白、濕冷、冒冷汗
+  glucose:
+    zh-Hant: 45 mg/dL
+  spO2:
+    zh-Hant: 96%
+  bp:
+    zh-Hant: 105/65 mmHg
 crew:
   lead:
     role: lead
-    carries: [jumpkit]
+    carries:
+      - jumpkit
     duty:
       zh-Hant: 主導評估與處置
   assist:
     role: assist
-    carries: [o2kit]
+    carries:
+      - o2kit
     duty:
       zh-Hant: 詢問病史家屬、紀錄
-
 phases:
   - id: arrival
     illustration: /illustrations/scenes/indoor_hypoglycemia.png
@@ -33,94 +42,87 @@ phases:
     hint:
       zh-Hant: 進入現場應先做好自我防護並評估現場環境。
     required:
-      - { action: 評估現場安全 }
-      - { action: 戴手套口罩 }
+      - action_id: check_scene_safe
+      - action_id: wear_ppe
     timeout: 30
-
   - id: primary_r_a
     narrative:
       zh-Hant: 現場安全。你走近患者——他睜開眼睛看你，但無法回答問題，嘴裡發出含糊的聲音。
     hint:
       zh-Hant: 使用 AVPU 確認意識程度，並確認呼吸道狀況。
     required:
-      - { action: 拍肩呼喚評估意識 AVPU }
-      - { action: 確認氣道暢通 }
+      - action_id: check_consciousness_avpu
+      - action_id: check_airway
     timeout: 30
-
   - id: primary_b_c
     narrative:
       zh-Hant: 患者對呼喚有反應，可發出聲音。你聞到口中無特殊氣味，呼吸道看起來通暢。
     hint:
       zh-Hant: 觀察呼吸起伏、觸摸脈搏，並注意皮膚溫度與顏色。
     required:
-      - { action: 看呼吸起伏 }
-      - { action: 檢查橈動脈脈搏 }
-      - { action: 檢查皮膚徵象 }
+      - action_id: check_breath
+      - action_id: check_pulse_radial
+      - action_id: check_skin_signs
     timeout: 30
-
   - id: primary_ancillary_history
     narrative:
       zh-Hant: 你的手觸碰到他的前臂——皮膚冰涼、濕黏，滿是冷汗。家屬在旁一直重複：「他今天早上什麼都沒吃……」
     hint:
       zh-Hant: 透過詢問 SAMPLE 了解病史，意識改變的患者應考慮量測血糖。
     required:
-      - { action: 詢問 SAMPLE 病史 }
-      - { action: 量測血糖 }
+      - action_id: sample_history
+      - action_id: blood_glucose_test
     timeout: 60
-
   - id: determine_criticality
     narrative:
       zh-Hant: 家屬說他有糖尿病、早上打了胰島素卻沒吃東西。血糖儀的數字出現了——45 mg/dL。
     hint:
       zh-Hant: 綜合所有發現，判斷此個案的危急程度。
     required:
-      - { action: 判斷為危急個案 }
+      - action_id: declare_critical
     timeout: 20
-
   - id: secondary_assessment
     narrative:
       zh-Hant: 患者手腳軟癱，眼神渙散，無法執行指令。你需要進一步確認還有沒有其他問題。
     hint:
       zh-Hant: 量測生命徵象，並以 G-FAST 排除中風可能性。
     required:
-      - { action: 量測血壓 }
-      - { action: 量測血氧 }
-      - { action: 辛辛那提中風評估 G-FAST }
-      - { action: 全身身體檢查 }
+      - action_id: measure_bp
+      - action_id: measure_spo2
+      - action_id: stroke_cps_assess
+      - action_id: physical_exam
     timeout: 90
-
   - id: intervention
     narrative:
       zh-Hant: G-FAST 三項均無明顯異常。患者仍意識模糊，皮膚持續濕冷。
     hint:
       zh-Hant: 依照評估結果，給予適當的低血糖處置與支持性治療。
     required:
-      - { action: 給予口服糖粉/葡萄糖 }
-      - { action: 鼻管給氧 }
+      - action_id: oral_glucose_give
+      - action_id: nasal_cannula_oxygen
     timeout: 45
-
   - id: transport
     narrative:
       zh-Hant: 幾分鐘後，患者緩緩睜開眼睛，開始可以說話。但他仍需要後送觀察。
     hint:
       zh-Hant: 準備移送並完成救護交班。
     required:
-      - { action: 移送上救護車 }
-      - { action: 送醫 }
-      - { action: ISBAR 交班 }
+      - action_id: load_into_ambulance
+      - action_id: transport_to_hospital
+      - action_id: isbar_handoff
     timeout: 90
-
 outcomes:
   - id: textbook
     when: 已測血糖 且 已給葡萄糖 且 正確率>=0.85
-    title: { zh-Hant: 教科書級處置 }
+    title:
+      zh-Hant: 教科書級處置
     text:
       zh-Hant: 你正確地在初評階段完成了病史與輔助評估，並精確判定危急度。
     illustration: /illustrations/outcomes/recover.png
-
   - id: failed
     when: 預設
-    title: { zh-Hant: 處置細節待加強 }
+    title:
+      zh-Hant: 處置細節待加強
     text:
       zh-Hant: 雖完成救護，但建議更熟練初評與二評的動作配置。
     illustration: /illustrations/outcomes/handoff.png

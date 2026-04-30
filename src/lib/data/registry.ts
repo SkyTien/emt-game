@@ -20,16 +20,6 @@ export class ActionRegistry {
 		this.byLabelMap.set(label, action);
 	}
 
-	resolve(label: string): Action {
-		const a = this.byLabelMap.get(label);
-		if (!a) throw new Error(`ActionRegistry: unknown action label "${label}"`);
-		return a;
-	}
-
-	tryResolve(label: string): Action | undefined {
-		return this.byLabelMap.get(label);
-	}
-
 	byId(id: string): Action {
 		const a = this.byIdMap.get(id);
 		if (!a) throw new Error(`ActionRegistry: unknown action id "${id}"`);

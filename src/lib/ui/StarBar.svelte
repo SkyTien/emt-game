@@ -3,7 +3,7 @@
 </script>
 
 <span class="stars" aria-label={`${stars}/${max}`}>
-	{#each Array(max) as _, i (i)}
+	{#each Array.from({ length: max }) as _, i (i)}
 		<span class="star" class:filled={i < stars}>★</span>
 	{/each}
 </span>

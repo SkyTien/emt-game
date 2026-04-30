@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
-	import { fade, slide, fly } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 	import { ScenarioEngine } from '$lib/engine/scenario-engine';
 	import ActionList from '$lib/ui/ActionList.svelte';
 	import Toolbox from '$lib/ui/Toolbox.svelte';
@@ -17,7 +17,7 @@
 	const scenario = $derived(data.scenario);
 	const registry = $derived(data.registry);
 
-	let gameState: ScenarioState = $state() as any;
+	let gameState: ScenarioState = $state() as ScenarioState;
 
 	$effect.pre(() => {
 		if (scenario) {
@@ -27,7 +27,6 @@
 
 	let lastFeedback = $state<Feedback | null>(null);
 	let showLog = $state(false);
-	let flash = $state(false);
 	let narrativeFinished = $state(false);
 
 	// Mode State
@@ -96,10 +95,7 @@
 		// This also prevents `narrativeId` from incrementing, keeping `activeMode` open
 		// until the scenario phase actually advances.
 
-		if (!result.feedback.correct) {
-			flash = true;
-			setTimeout(() => (flash = false), 500);
-		}
+		// Feedback overlay handles visual feedback display
 	}
 </script>
 
@@ -248,11 +244,7 @@
 
 	<!-- 反饋層 -->
 	{#if lastFeedback}
-		<FeedbackOverlay
-			correct={lastFeedback.correct}
-			message={lastFeedback.message}
-			onClose={() => (lastFeedback = null)}
-		/>
+		<FeedbackOverlay correct={lastFeedback.correct} onClose={() => (lastFeedback = null)} />
 	{/if}
 
 	<!-- 日誌疊層 -->
@@ -465,12 +457,6 @@
 		line-height: 1.6;
 		color: #f8fafc;
 	}
-	.action-item.done {
-		border-color: rgba(72, 187, 120, 0.5);
-		background: rgba(72, 187, 120, 0.1);
-		color: #9ae6b4;
-	}
-
 	/* 狀態區塊 */
 	:global(.patient-status-wrapper) {
 		padding: 1rem;

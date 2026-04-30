@@ -19,6 +19,7 @@
 			kind: string;
 			tMs: number;
 			actionId?: string;
+			actionLabel?: string;
 			by?: string;
 			correct?: boolean;
 			toPhaseId?: string;
@@ -95,7 +96,7 @@
 								>{$_(entry.correct ? 'timeline.correct' : 'timeline.incorrect')}</span
 							>
 							<span>{$_(`timeline.by_${entry.by === 'assist' ? 'partner' : 'player'}`)}</span>
-							<span class="action">「{entry.actionId}」</span>
+							<span class="action">「{entry.actionLabel ?? entry.actionId}」</span>
 						{:else if entry.kind === 'on_skip'}
 							<span class="bad">{$_('timeline.event_skip')}</span>
 							<span>{entry.phaseId}</span>

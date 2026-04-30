@@ -70,6 +70,13 @@
 	function toggle(zone: ZoneId) {
 		selectedZone = selectedZone === zone ? null : zone;
 	}
+
+	function handleZoneKeydown(event: KeyboardEvent, zone: ZoneId) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			toggle(zone);
+		}
+	}
 </script>
 
 <div class="body-console" class:simple={mode === 'list'}>
@@ -89,97 +96,176 @@
 					</defs>
 
 					<!-- 頭部 Head -->
-					<circle cx="50" cy="25" r="15" 
-						class="zone" 
-						class:active={selectedZone === 'head'} 
-						class:done={allDone('head')} 
-						class:partial={hasDone('head') && !allDone('head')} 
-						style="--c: {ZONES.head.color}" 
-						onclick={() => toggle('head')} 
+					<circle
+						cx="50"
+						cy="25"
+						r="15"
+						class="zone"
+						class:active={selectedZone === 'head'}
+						class:done={allDone('head')}
+						class:partial={hasDone('head') && !allDone('head')}
+						style="--c: {ZONES.head.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('head')}
+						onkeydown={(e) => handleZoneKeydown(e, 'head')}
 					/>
 					<!-- 頸部 Neck -->
-					<rect x="42" y="42" width="16" height="8" rx="2" 
-						class="zone" 
-						class:active={selectedZone === 'neck'} 
-						class:done={allDone('neck')} 
-						class:partial={hasDone('neck') && !allDone('neck')} 
-						style="--c: {ZONES.neck.color}" 
-						onclick={() => toggle('neck')} 
+					<rect
+						x="42"
+						y="42"
+						width="16"
+						height="8"
+						rx="2"
+						class="zone"
+						class:active={selectedZone === 'neck'}
+						class:done={allDone('neck')}
+						class:partial={hasDone('neck') && !allDone('neck')}
+						style="--c: {ZONES.neck.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('neck')}
+						onkeydown={(e) => handleZoneKeydown(e, 'neck')}
 					/>
 					<!-- 胸部 Chest -->
-					<rect x="28" y="52" width="44" height="35" rx="5" 
-						class="zone" 
-						class:active={selectedZone === 'chest'} 
-						class:done={allDone('chest')} 
-						class:partial={hasDone('chest') && !allDone('chest')} 
-						style="--c: {ZONES.chest.color}" 
-						onclick={() => toggle('chest')} 
+					<rect
+						x="28"
+						y="52"
+						width="44"
+						height="35"
+						rx="5"
+						class="zone"
+						class:active={selectedZone === 'chest'}
+						class:done={allDone('chest')}
+						class:partial={hasDone('chest') && !allDone('chest')}
+						style="--c: {ZONES.chest.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('chest')}
+						onkeydown={(e) => handleZoneKeydown(e, 'chest')}
 					/>
 					<!-- 腹部 Abdomen -->
-					<rect x="30" y="89" width="40" height="35" rx="5" 
-						class="zone" 
-						class:active={selectedZone === 'abdomen'} 
-						class:done={allDone('abdomen')} 
-						class:partial={hasDone('abdomen') && !allDone('abdomen')} 
-						style="--c: {ZONES.abdomen.color}" 
-						onclick={() => toggle('abdomen')} 
+					<rect
+						x="30"
+						y="89"
+						width="40"
+						height="35"
+						rx="5"
+						class="zone"
+						class:active={selectedZone === 'abdomen'}
+						class:done={allDone('abdomen')}
+						class:partial={hasDone('abdomen') && !allDone('abdomen')}
+						style="--c: {ZONES.abdomen.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('abdomen')}
+						onkeydown={(e) => handleZoneKeydown(e, 'abdomen')}
 					/>
 					<!-- 手臂 Arms (Left and Right) -->
-					<rect x="14" y="52" width="12" height="60" rx="4" 
-						class="zone" 
-						class:active={selectedZone === 'arm'} 
-						class:done={allDone('arm')} 
-						class:partial={hasDone('arm') && !allDone('arm')} 
-						style="--c: {ZONES.arm.color}" 
-						onclick={() => toggle('arm')} 
+					<rect
+						x="14"
+						y="52"
+						width="12"
+						height="60"
+						rx="4"
+						class="zone"
+						class:active={selectedZone === 'arm'}
+						class:done={allDone('arm')}
+						class:partial={hasDone('arm') && !allDone('arm')}
+						style="--c: {ZONES.arm.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('arm')}
+						onkeydown={(e) => handleZoneKeydown(e, 'arm')}
 					/>
-					<rect x="74" y="52" width="12" height="60" rx="4" 
-						class="zone" 
-						class:active={selectedZone === 'arm'} 
-						class:done={allDone('arm')} 
-						class:partial={hasDone('arm') && !allDone('arm')} 
-						style="--c: {ZONES.arm.color}" 
-						onclick={() => toggle('arm')} 
+					<rect
+						x="74"
+						y="52"
+						width="12"
+						height="60"
+						rx="4"
+						class="zone"
+						class:active={selectedZone === 'arm'}
+						class:done={allDone('arm')}
+						class:partial={hasDone('arm') && !allDone('arm')}
+						style="--c: {ZONES.arm.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('arm')}
+						onkeydown={(e) => handleZoneKeydown(e, 'arm')}
 					/>
 					<!-- 手腕 Wrists (Left and Right) -->
-					<circle cx="20" cy="118" r="6" 
-						class="zone" 
-						class:active={selectedZone === 'wrist'} 
-						class:done={allDone('wrist')} 
-						class:partial={hasDone('wrist') && !allDone('wrist')} 
-						style="--c: {ZONES.wrist.color}" 
-						onclick={() => toggle('wrist')} 
+					<circle
+						cx="20"
+						cy="118"
+						r="6"
+						class="zone"
+						class:active={selectedZone === 'wrist'}
+						class:done={allDone('wrist')}
+						class:partial={hasDone('wrist') && !allDone('wrist')}
+						style="--c: {ZONES.wrist.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('wrist')}
+						onkeydown={(e) => handleZoneKeydown(e, 'wrist')}
 					/>
-					<circle cx="80" cy="118" r="6" 
-						class="zone" 
-						class:active={selectedZone === 'wrist'} 
-						class:done={allDone('wrist')} 
-						class:partial={hasDone('wrist') && !allDone('wrist')} 
-						style="--c: {ZONES.wrist.color}" 
-						onclick={() => toggle('wrist')} 
+					<circle
+						cx="80"
+						cy="118"
+						r="6"
+						class="zone"
+						class:active={selectedZone === 'wrist'}
+						class:done={allDone('wrist')}
+						class:partial={hasDone('wrist') && !allDone('wrist')}
+						style="--c: {ZONES.wrist.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('wrist')}
+						onkeydown={(e) => handleZoneKeydown(e, 'wrist')}
 					/>
 					<!-- 腿部 Legs (Left and Right) -->
-					<rect x="30" y="126" width="18" height="90" rx="5" 
-						class="zone" 
-						class:active={selectedZone === 'leg'} 
-						class:done={allDone('leg')} 
-						class:partial={hasDone('leg') && !allDone('leg')} 
-						style="--c: {ZONES.leg.color}" 
-						onclick={() => toggle('leg')} 
+					<rect
+						x="30"
+						y="126"
+						width="18"
+						height="90"
+						rx="5"
+						class="zone"
+						class:active={selectedZone === 'leg'}
+						class:done={allDone('leg')}
+						class:partial={hasDone('leg') && !allDone('leg')}
+						style="--c: {ZONES.leg.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('leg')}
+						onkeydown={(e) => handleZoneKeydown(e, 'leg')}
 					/>
-					<rect x="52" y="126" width="18" height="90" rx="5" 
-						class="zone" 
-						class:active={selectedZone === 'leg'} 
-						class:done={allDone('leg')} 
-						class:partial={hasDone('leg') && !allDone('leg')} 
-						style="--c: {ZONES.leg.color}" 
-						onclick={() => toggle('leg')} 
+					<rect
+						x="52"
+						y="126"
+						width="18"
+						height="90"
+						rx="5"
+						class="zone"
+						class:active={selectedZone === 'leg'}
+						class:done={allDone('leg')}
+						class:partial={hasDone('leg') && !allDone('leg')}
+						style="--c: {ZONES.leg.color}"
+						role="button"
+						tabindex="0"
+						onclick={() => toggle('leg')}
+						onkeydown={(e) => handleZoneKeydown(e, 'leg')}
 					/>
 				</svg>
 				<div class="scanline"></div>
 			</div>
-			<button class="general-btn" class:active={selectedZone === 'general'} onclick={() => toggle('general')}>
-				<Icon name="ClipboardCheck" size={16} /> {$_('scenario.general_assessment')}
+			<button
+				class="general-btn"
+				class:active={selectedZone === 'general'}
+				onclick={() => toggle('general')}
+			>
+				<Icon name="ClipboardCheck" size={16} />
+				{$_('scenario.general_assessment')}
 			</button>
 		</div>
 	{/if}
@@ -192,7 +278,9 @@
 				<span class="zone-title" style="color: {meta.color}">
 					{actions ? $_('scenario.action_list_title') : meta.label}
 				</span>
-				<span class="zone-count">{$_('scenario.item_count', { values: { count: currentActions.length } })}</span>
+				<span class="zone-count"
+					>{$_('scenario.item_count', { values: { count: currentActions.length } })}</span
+				>
 			</div>
 
 			<div class="actions-list" in:fade={{ duration: 150 }}>
@@ -221,7 +309,7 @@
 		{:else}
 			<div class="empty-hint">
 				<div class="hint-icon">👆</div>
-				<p>{@html $_('scenario.action_pick_region')}</p>
+				<p>{$_('scenario.action_pick_region')}</p>
 			</div>
 		{/if}
 	</div>
@@ -323,7 +411,7 @@
 		background: rgba(59, 130, 246, 0.2);
 		border-color: #3b82f6;
 		color: #60a5fa;
-	}	/* === 動作面板 === */
+	} /* === 動作面板 === */
 	.action-panel {
 		flex: 1;
 		display: flex;

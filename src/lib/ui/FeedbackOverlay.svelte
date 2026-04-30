@@ -5,11 +5,9 @@
 
 	let {
 		correct,
-		message,
 		onClose
 	}: {
 		correct: boolean;
-		message?: string;
 		onClose: () => void;
 	} = $props();
 

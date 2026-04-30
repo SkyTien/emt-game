@@ -123,7 +123,9 @@
 							{/if}
 						</div>
 						<div class="feedback-text">
-							<span class="fb-label">{lastFeedback.correct ? $_('timeline.correct') : $_('timeline.incorrect')}</span>
+							<span class="fb-label"
+								>{lastFeedback.correct ? $_('timeline.correct') : $_('timeline.incorrect')}</span
+							>
 							<span class="fb-action">{lastFeedback.message}</span>
 						</div>
 					</div>
@@ -154,7 +156,11 @@
 				<section class="action-panel">
 					{#if pickedRegion && regionActions.length > 0}
 						<div class="region-actions">
-							<h3 class="sec-title">{$_('technique.region_picked', { values: { region: $_(`scenario.zone_${pickedRegion}`) } })}</h3>
+							<h3 class="sec-title">
+								{$_('technique.region_picked', {
+									values: { region: $_(`scenario.zone_${pickedRegion}`) }
+								})}
+							</h3>
 							<ActionList actions={regionActions} onpick={onPick} />
 						</div>
 					{/if}

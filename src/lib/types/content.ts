@@ -46,7 +46,11 @@ export type Phase = {
 	id: string;
 	narrative: LocalizedString;
 	required: {
-		action: string;
+		/**
+		 * Stable action ID (e.g., "check_pulse_carotid").
+		 * Primary reference format.
+		 */
+		action_id: string;
 		by?: 'player' | 'partner' | 'either';
 		set_flag?: string;
 	}[];
@@ -99,7 +103,11 @@ export type Scenario = {
 
 export type TechniqueStep = {
 	id: string;
-	action: string;
+	/**
+	 * Stable action ID (e.g., "check_pulse_carotid").
+	 * Primary reference format.
+	 */
+	action_id: string;
 	tip?: LocalizedString;
 };
 

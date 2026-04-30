@@ -13,9 +13,8 @@
 		revealed?: string[];
 	} = $props();
 
-	function getVal(key: keyof PatientVitals, labelKey: string) {
+	function getVal(key: keyof PatientVitals) {
 		if (revealed.includes(key)) {
-			// @ts-ignore
 			return localize(patient[key], $locale ?? 'zh-Hant');
 		}
 		return $_('scenario.status_not_assessed');
@@ -26,19 +25,19 @@
 	<div class="cell">
 		<span class="label">{$_('scenario.patient_consciousness')}</span>
 		<span class="value" class:unrated={!revealed.includes('consciousness')}>
-			{getVal('consciousness', 'scenario.patient_consciousness')}
+			{getVal('consciousness')}
 		</span>
 	</div>
 	<div class="cell">
 		<span class="label">{$_('scenario.patient_breath')}</span>
 		<span class="value" class:unrated={!revealed.includes('breath')}>
-			{getVal('breath', 'scenario.patient_breath')}
+			{getVal('breath')}
 		</span>
 	</div>
 	<div class="cell">
 		<span class="label">{$_('scenario.patient_pulse')}</span>
 		<span class="value" class:unrated={!revealed.includes('pulse')}>
-			{getVal('pulse', 'scenario.patient_pulse')}
+			{getVal('pulse')}
 		</span>
 	</div>
 	{#if patient.skin && revealed.includes('skin')}

@@ -25,7 +25,7 @@
 
 			<div class="main">
 				{#if entry.kind === 'action'}
-					<span class="action-name">{entry.actionId}</span>
+					<span class="action-name">{entry.actionLabel}</span>
 					<span class="role-tag">{entry.by}</span>
 				{:else}
 					<span class="system-msg">

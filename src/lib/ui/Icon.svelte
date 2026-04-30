@@ -9,7 +9,7 @@
 		class: className = ''
 	} = $props();
 
-	// @ts-ignore
+	// @ts-expect-error - dynamic icon lookup
 	const Icon = $derived(Icons[name]);
 </script>
 

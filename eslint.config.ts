@@ -25,5 +25,16 @@ export default [
 	},
 	{
 		ignores: ['build/', '.svelte-kit/', 'node_modules/', 'playwright-report/', 'test-results/']
+	},
+	{
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_'
+				}
+			]
+		}
 	}
 ];

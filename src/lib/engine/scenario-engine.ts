@@ -7,6 +7,7 @@ import type {
 	Scenario
 } from '$lib/types/content';
 import { evaluateCondition } from './condition';
+import { getRegistry } from '$lib/data/content';
 
 export type Location = 'on_scene' | 'on_partner' | 'in_vehicle' | 'unknown';
 
@@ -15,6 +16,7 @@ export type ActionLogEntry =
 			kind: 'action';
 			tMs: number;
 			actionId: string;
+			actionLabel: string;
 			by: ActorRole;
 			correct: boolean;
 			note?: LocalizedString;
@@ -95,7 +97,7 @@ export const ScenarioEngine = {
 
 	performAction(
 		state: ScenarioState,
-		actionLabel: string,
+		actionIdOrLabel: string,
 		by: ActorRole,
 		nowMs = state.phaseStartTimeMs
 	): { state: ScenarioState; feedback: Feedback } {
@@ -105,7 +107,36 @@ export const ScenarioEngine = {
 		const phase = ScenarioEngine.currentPhase(state);
 		if (!phase) return { state, feedback: { correct: false, message: 'no_phase' } };
 
-		const required = phase.required.find((r) => r.action === actionLabel);
+		// Verify action exists
+		const registry = getRegistry();
+		const actionId = actionIdOrLabel;
+		try {
+			registry.byId(actionId);
+		} catch {
+			// Unknown action; treat as incorrect and count as wrong
+			const next: ScenarioState = {
+				...state,
+				wrongActions: state.wrongActions + 1,
+				consecutiveMistakes: state.consecutiveMistakes + 1,
+				completedRequiredIds: new Set(state.completedRequiredIds),
+				flags: new Set(state.flags),
+				log: [
+					...state.log,
+					{
+						kind: 'action' as const,
+						tMs: nowMs,
+						actionId: actionIdOrLabel,
+						actionLabel: actionIdOrLabel,
+						by,
+						correct: false
+					}
+				]
+			};
+			return { state: next, feedback: { correct: false, message: 'unknown_action' } };
+		}
+
+		// Find matching required entry by ID
+		const required = phase.required.find((r) => r.action_id === actionId);
 		const isCorrect = Boolean(required) && roleMatches(required?.by, by, state.playerRole);
 
 		const next: ScenarioState = {
@@ -116,25 +147,27 @@ export const ScenarioEngine = {
 		};
 
 		if (isCorrect) {
-			next.completedRequiredIds.add(actionLabel);
+			next.completedRequiredIds.add(actionId);
 			next.correctActions += 1;
 			next.consecutiveMistakes = 0;
 			if (required?.set_flag) next.flags.add(required.set_flag);
 
-			// Reveal Vitals Logic
-			if (actionLabel.includes('評估意識') || actionLabel.includes('AVPU'))
+			// Reveal Vitals Logic - use action label for text-based matching
+			const action = registry.byId(actionId);
+			const label = action.label['zh-Hant'];
+			if (label.includes('評估意識') || label.includes('AVPU'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'consciousness'])];
-			if (actionLabel.includes('呼吸'))
+			if (label.includes('呼吸'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'breath'])];
-			if (actionLabel.includes('脈搏'))
+			if (label.includes('脈搏'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'pulse'])];
-			if (actionLabel.includes('皮膚'))
+			if (label.includes('皮膚'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'skin'])];
-			if (actionLabel.includes('血糖'))
+			if (label.includes('血糖'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'glucose'])];
-			if (actionLabel.includes('血氧'))
+			if (label.includes('血氧'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'spO2'])];
-			if (actionLabel.includes('血壓'))
+			if (label.includes('血壓'))
 				next.revealedVitals = [...new Set([...next.revealedVitals, 'bp'])];
 		} else {
 			next.wrongActions += 1;
@@ -143,7 +176,8 @@ export const ScenarioEngine = {
 		next.log.push({
 			kind: 'action',
 			tMs: nowMs,
-			actionId: actionLabel,
+			actionId: actionId,
+			actionLabel: registry.byId(actionId).label['zh-Hant'],
 			by,
 			correct: isCorrect
 		});
@@ -249,8 +283,8 @@ function degradePatient(p: PatientVitals, worsen: number): void {
 	p.consciousness['zh-Hant'] = (p.consciousness['zh-Hant'] ?? '') + tag;
 }
 
-function isPhaseComplete(phase: Phase, completedLabels: Set<string>): boolean {
-	return phase.required.every((r) => completedLabels.has(r.action));
+function isPhaseComplete(phase: Phase, completedIds: Set<string>): boolean {
+	return phase.required.every((r) => completedIds.has(r.action_id));
 }
 
 function maybeAdvancePhase(state: ScenarioState, nowMs: number): ScenarioState {

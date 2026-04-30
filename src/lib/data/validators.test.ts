@@ -92,12 +92,10 @@ const goodTechnique: Technique = {
 	steps: [
 		{
 			id: 'pick_size',
-			action: '挑選頸圈尺寸',
 			tip: { 'zh-Hant': '量下顎到肩膀指距' }
 		},
 		{
-			id: 'apply',
-			action: '套上頸圈'
+			id: 'apply'
 		}
 	]
 };
@@ -220,9 +218,9 @@ describe('validateTechnique', () => {
 		expect(r.errors.some((e) => e.code === 'empty_steps')).toBe(true);
 	});
 
-	it('rejects step.action not in registry', () => {
+	it('rejects step.action_id not in registry', () => {
 		const bad = structuredClone(goodTechnique);
-		bad.steps[0].action = '不存在的動作';
+		bad.steps[0].action_id = '不存在的動作';
 		const r = validateTechnique(bad, reg);
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'unknown_action')).toBe(true);
@@ -234,5 +232,172 @@ describe('validateTechnique', () => {
 		const r = validateTechnique(bad, reg);
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'locale_map_missing_zh_hant')).toBe(true);
+	});
+});
+
+describe('validateScenario - deprecated label warnings (task 3.5)', () => {
+	const reg = makeRegistry();
+
+	it('warns when scenario required uses only label (old format)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action: '評估現場安全' }];
+		scenario.phases[1].required = [{ action: '心臟按壓' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
+	});
+
+	it('does not warn when scenario required uses action_id (new format)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action_id: 'check_scene_safe' }];
+		scenario.phases[1].required = [{ action_id: 'cpr_compress' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
+		expect(deprecatedWarnings).toHaveLength(0);
+	});
+
+	it('does not warn when scenario required uses both (action_id takes precedence)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action_id: 'check_scene_safe', action: '評估現場安全' }];
+		scenario.phases[1].required = [{ action_id: 'cpr_compress', action: '心臟按壓' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
+		expect(deprecatedWarnings).toHaveLength(0);
+	});
+});
+
+describe('validateTechnique - deprecated label warnings (task 3.5)', () => {
+	const reg = makeRegistry();
+
+	it('warns when technique step uses only label (old format)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', action: '挑選頸圈尺寸' };
+		technique.steps[1] = { id: 'step2', action: '套上頸圈' };
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
+	});
+
+	it('does not warn when technique step uses action_id (new format)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', action_id: 'cervical_collar_pick' };
+		technique.steps[1] = { id: 'step2', action_id: 'cervical_collar_apply' };
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
+		expect(deprecatedWarnings).toHaveLength(0);
+	});
+
+	it('does not warn when technique step uses both (action_id takes precedence)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = {
+			id: 'step1',
+			action_id: 'cervical_collar_pick'
+		};
+		technique.steps[1] = {
+			id: 'step2',
+			action_id: 'cervical_collar_apply'
+		};
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
+		expect(deprecatedWarnings).toHaveLength(0);
+	});
+});
+
+describe('validateScenario - both formats (task 3.6)', () => {
+	const reg = makeRegistry();
+
+	it('accepts scenario with action_id only (new format)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action_id: 'check_scene_safe' }];
+		scenario.phases[1].required = [{ action_id: 'cpr_compress' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+	});
+
+	it('accepts scenario with action only (old format with warning)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action: '評估現場安全' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
+	});
+
+	it('accepts scenario with both fields present (prefer action_id)', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action_id: 'check_scene_safe', action: '評估現場安全' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+	});
+
+	it('rejects required entry with neither action nor action_id', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ by: 'player' } as never];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(false);
+		expect(r.errors.some((e) => e.code === 'invalid_type')).toBe(true);
+	});
+
+	it('rejects required entry with empty action and action_id', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required = [{ action: '', action_id: '' }];
+		const r = validateScenario(scenario, reg);
+		expect(r.ok).toBe(false);
+		expect(r.errors.some((e) => e.code === 'invalid_type')).toBe(true);
+	});
+});
+
+describe('validateTechnique - both formats (task 3.6)', () => {
+	const reg = makeRegistry();
+
+	it('accepts technique with action_id only (new format)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', action_id: 'cervical_collar_pick' };
+		technique.steps[1] = { id: 'step2', action_id: 'cervical_collar_apply' };
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+	});
+
+	it('accepts technique with action only (old format with warning)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', action: '挑選頸圈尺寸' };
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
+	});
+
+	it('accepts technique with both fields present (prefer action_id)', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = {
+			id: 'step1',
+			action_id: 'cervical_collar_pick'
+		};
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(true);
+		expect(r.errors).toHaveLength(0);
+	});
+
+	it('rejects step with neither action nor action_id', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', tip: { 'zh-Hant': 'test' } } as never;
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(false);
+		expect(r.errors.some((e) => e.code === 'missing_action')).toBe(true);
+	});
+
+	it('rejects step with empty action and action_id', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.steps[0] = { id: 'step1', action: '', action_id: '' };
+		const r = validateTechnique(technique, reg);
+		expect(r.ok).toBe(false);
+		expect(r.errors.some((e) => e.code === 'missing_action')).toBe(true);
 	});
 });
