@@ -3,7 +3,7 @@ schema_version: 1
 title:
   zh-Hant: 室內長者救護
 illustration: /illustrations/scenes/indoor_hypoglycemia_wide.png
-player_role: either
+player_role: lead
 patient_initial:
   consciousness:
     zh-Hant: 嗜睡、口齒不清
@@ -68,7 +68,7 @@ phases:
     narrative:
       zh-Hant: 你的手觸碰到他的前臂——皮膚冰涼、濕黏，滿是冷汗。家屬在旁一直重複：「他今天早上什麼都沒吃……」
     hint:
-      zh-Hant: 透過詢問 SAMPLE 了解病史，意識改變的患者應考慮量測血糖。
+      zh-Hant: 針對意識改變的病人，進行聚焦式 SAMPLE 快速問診（重點：糖尿病史、最後一餐、用藥），而非完整二評的全套問診；同時量測血糖以排除低血糖。
     required:
       - action_id: sample_history
       - action_id: blood_glucose_test
@@ -86,7 +86,7 @@ phases:
     narrative:
       zh-Hant: 患者手腳軟癱，眼神渙散，無法執行指令。你需要進一步確認還有沒有其他問題。
     hint:
-      zh-Hant: 量測生命徵象，並以 G-FAST 排除中風可能性。
+      zh-Hant: 量測生命徵象，並以辛辛那提中風指標（CPSS）排除中風可能性：評估臉部下垂、手臂無力、言語異常三項。
     required:
       - action_id: measure_bp
       - action_id: measure_spo2
@@ -95,9 +95,9 @@ phases:
     timeout: 90
   - id: intervention
     narrative:
-      zh-Hant: G-FAST 三項均無明顯異常。患者仍意識模糊，皮膚持續濕冷。血氧 96%，依規範不需例行氧療。
+      zh-Hant: CPSS 三項均無明顯異常。給予口頭指令後，患者可緩慢遵從，確認具備吞嚥能力。血氧 96%，依 SpO2 指標未達氧療閾值，暫不執行例行氧療。
     hint:
-      zh-Hant: 依照評估結果，給予適當的低血糖處置與支持性治療。
+      zh-Hant: 確認患者意識清楚且能吞嚥後，才可給予口服葡萄糖；意識未恢復時禁止口服，以防吸入性肺炎。
     required:
       - action_id: oral_glucose_give
         set_flag: 已給葡萄糖
@@ -118,7 +118,7 @@ outcomes:
     title:
       zh-Hant: 教科書級處置
     text:
-      zh-Hant: 你正確地在初評階段完成了病史與輔助評估，並精確判定危急度。
+      zh-Hant: 你在初評完成病史詢問與血糖量測，以 CPSS 系統性排除中風，正確判定危急度，並在確認吞嚥能力後給予口服葡萄糖。整體流程符合台灣 EMT-1 教學標準。
     illustration: /illustrations/outcomes/recover.png
   - id: failed
     when: 預設

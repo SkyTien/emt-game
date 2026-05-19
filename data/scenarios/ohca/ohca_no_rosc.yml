@@ -1,0 +1,59 @@
+id: ohca_no_rosc
+schema_version: 1
+hidden: true
+extends: ohca_adult_street
+title:
+  zh-Hant: 路倒成人救護
+phases:
+  - id: post_aed_assess
+    narrative:
+      zh-Hant: 電擊後你立即恢復按壓。數輪 CPR 後，再次觸摸頸動脈——仍摸不到脈搏，病人未恢復自主循環。
+    hint:
+      zh-Hant: 無 ROSC 時立即繼續高品質 CPR，不可因再評估而中斷過久；維持 30:2 節奏，準備送醫。
+    required:
+      - action_id: check_pulse_carotid
+        by: lead
+    timeout: 20
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未再評估脈搏，無法確認是否 ROSC。
+  - id: continued_cpr
+    narrative:
+      zh-Hant: 確認無脈搏，繼續高品質 CPR。準備移送，途中不中斷按壓。
+    hint:
+      zh-Hant: 持續 30:2 高品質 CPR，減少中斷；移送途中維持按壓，並準備 ISBAR 交班。
+    required:
+      - action_id: cpr_compress_adult
+        by: lead
+      - action_id: bvm_ventilate
+        by: assist
+      - action_id: isbar_handoff
+        by: lead
+    timeout: 60
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: CPR 中斷或未交班，急診接手延誤。
+outcomes:
+  - id: continued_cpr_good
+    when: 已電擊 且 正確率>=0.85
+    title:
+      zh-Hant: 持續 CPR 送醫
+    text:
+      zh-Hant: 雖到院前未恢復循環，但持續高品質 CPR 與電擊讓急診有機會接手進一步搶救。
+    illustration: /illustrations/outcomes/cpr.png
+  - id: continued_cpr_poor
+    when: 已電擊
+    title:
+      zh-Hant: 持續 CPR 但品質待加強
+    text:
+      zh-Hant: 有執行電擊，但 CPR 流程有延誤或中斷。請回顧時間軸找出可以改進的環節。
+    illustration: /illustrations/outcomes/cpr.png
+  - id: doa
+    when: 預設
+    title:
+      zh-Hant: 到院前 DOA
+    text:
+      zh-Hant: 多項關鍵動作延誤，病人到院前無生命徵象。請檢視時間軸看哪些步驟可以更快。
+    illustration: /illustrations/outcomes/doa.png

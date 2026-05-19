@@ -51,8 +51,9 @@ export type Phase = {
 		 * Primary reference format.
 		 */
 		action_id: string;
-		by?: 'player' | 'partner' | 'either';
+		by?: 'lead' | 'assist';
 		set_flag?: string;
+		after?: string;
 	}[];
 	timeout?: number;
 	on_skip?: {
@@ -99,6 +100,7 @@ export type Scenario = {
 	phases: Phase[];
 	outcomes: Outcome[];
 	hidden?: boolean;
+	extends?: string;
 };
 
 export type TechniqueStep = {

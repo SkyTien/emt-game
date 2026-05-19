@@ -3,7 +3,7 @@ schema_version: 1
 title:
   zh-Hant: 交通事故救護
 illustration: /illustrations/scenes/motorcycle_trauma.png
-player_role: either
+player_role: lead
 patient_initial:
   consciousness:
     zh-Hant: 嗜睡可喚醒
@@ -44,24 +44,26 @@ phases:
     narrative:
       zh-Hant: 根據事故機制分析，病人有高度頸椎損傷風險。
     hint:
-      zh-Hant: 應先穩定頭頸部（徒手固定）避免脊髓損傷，並評估患者的基本意識程度。
+      zh-Hant: 副手立即徒手固定頭頸部，主手評估意識；確認穩定後盡快選取適當尺寸頸圈並套上，以釋放人力進行後續評估。
     required:
       - action_id: manual_inline_stabilization
-        by: partner
+        by: assist
       - action_id: check_consciousness_avpu
-    timeout: 30
+      - action_id: cervical_collar_pick_size
+      - action_id: cervical_collar_apply
+    timeout: 45
     on_skip:
       worsen: 2
       note:
-        zh-Hant: 沒固定頸椎就移動病人,可能造成脊髓損傷。
+        zh-Hant: 沒固定頸椎就移動病人，可能造成脊髓損傷；頸圈未及早套上則持續占用人力。
   - id: bleeding_x
     narrative:
       zh-Hant: 快速目視全身發現右大腿外側有明顯大量出血。
     hint:
-      zh-Hant: 創傷流程的 X(eXsanguinating)優先,先壓制致命性出血,再進入 ABC。
+      zh-Hant: 創傷 xABCDE 中 X 為致命性出血控制優先：大腿大量出血應優先考慮使用止血帶（tourniquet），綁於傷口近心端 5–8 公分處；若無止血帶，改以直接加壓止血。
     required:
       - action_id: control_bleeding_pressure
-        by: player
+        by: lead
     timeout: 45
     on_skip:
       worsen: 2
@@ -69,13 +71,13 @@ phases:
         zh-Hant: 未先處理大量出血,休克快速進展。
   - id: airway
     narrative:
-      zh-Hant: 出血已初步壓制。病人嗜睡,呼吸道內似有少量血絲與口水。
+      zh-Hant: 出血已初步壓制。病人嗜睡，呼吸道內似有少量血絲與口水。
     hint:
-      zh-Hant: 創傷疑似頸椎傷,以下顎推舉打開氣道而非後仰頭部。
+      zh-Hant: 呼吸道有分泌物時應先以抽吸器清除，再以下顎推舉開放氣道；創傷疑似頸椎損傷，禁用壓額抬下顎。
     required:
       - action_id: check_airway
       - action_id: open_airway_jaw_thrust
-        by: player
+        by: lead
     timeout: 45
     on_skip:
       worsen: 2
@@ -89,7 +91,7 @@ phases:
     required:
       - action_id: check_breath
       - action_id: oxygen_nrm
-        by: partner
+        by: assist
     timeout: 45
     on_skip:
       worsen: 1
@@ -110,10 +112,11 @@ phases:
         zh-Hant: 未掌握循環徵象,延誤休克判斷。
   - id: disability
     narrative:
-      zh-Hant: 進入 D 神經評估,確認意識與瞳孔。
+      zh-Hant: 進入 D 神經評估，確認意識與瞳孔。
     hint:
-      zh-Hant: 檢查瞳孔對光反應與大小對稱,評估中樞神經狀況。
+      zh-Hant: 再次以 AVPU 確認意識是否較初評改變，並檢查瞳孔對光反應與雙側大小是否對稱；意識惡化或瞳孔不等大須高度警覺顱內變化。
     required:
+      - action_id: check_consciousness_avpu
       - action_id: check_pupils
     timeout: 45
     on_skip:
@@ -127,7 +130,7 @@ phases:
       zh-Hant: 必要時掀開衣物找隱性傷口,評估後注意保暖。
     required:
       - action_id: assess_exposure
-        by: player
+        by: lead
     timeout: 45
     on_skip:
       worsen: 1
@@ -148,12 +151,10 @@ phases:
         zh-Hant: 未及時固定,移送途中骨折錯位惡化。
   - id: collar_board
     narrative:
-      zh-Hant: 出血已初步控制，準備進行長距離移送前的固定。
+      zh-Hant: 評估完成，準備進行移送前的完整脊椎固定。
     hint:
-      zh-Hant: 應先為病人套上合適尺寸的頸圈，隨後實施長背板固定以保護脊椎。
+      zh-Hant: 以長背板固定病人全身，確保移送途中脊椎穩定。
     required:
-      - action_id: cervical_collar_pick_size
-      - action_id: cervical_collar_apply
       - action_id: long_board_immobilize
     timeout: 90
     on_skip:
@@ -180,7 +181,7 @@ outcomes:
     title:
       zh-Hant: 病人到院時生命徵象穩定
     text:
-      zh-Hant: 完整的脊椎固定與及時止血,病人送達外傷中心時意識回復、循環穩定。
+      zh-Hant: 完整的脊椎固定與及時止血，病人送達外傷中心時意識清晰、循環穩定。
     illustration: /illustrations/outcomes/stable.png
   - id: hemorrhagic_shock
     when: 惡化等級>=2

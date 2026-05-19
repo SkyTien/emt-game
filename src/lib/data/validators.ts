@@ -163,6 +163,11 @@ function validateRequiredEntries(
 		pushError(errors, field, 'invalid_type', `${field}: required 必須為陣列`);
 		return;
 	}
+	const allActionIds = new Set(
+		requiredRaw
+			.filter((e) => typeof e === 'object' && e && typeof (e as { action_id?: unknown }).action_id === 'string')
+			.map((e) => (e as { action_id: string }).action_id)
+	);
 	requiredRaw.forEach((entry, i) => {
 		const subField = `${field}[${i}]`;
 
@@ -171,7 +176,7 @@ function validateRequiredEntries(
 			return;
 		}
 
-		const obj = entry as { action_id?: unknown };
+		const obj = entry as { action_id?: unknown; after?: unknown };
 		if (typeof obj.action_id !== 'string' || obj.action_id.length === 0) {
 			pushError(errors, subField, 'invalid_type', `${subField}: 必須含非空 action_id`);
 			return;
@@ -188,6 +193,29 @@ function validateRequiredEntries(
 				`${subField}: 找不到動作「${obj.action_id}」`,
 				obj.action_id
 			);
+		}
+
+		// Verify after references an action in the same phase
+		if (obj.after !== undefined) {
+			if (typeof obj.after !== 'string' || obj.after.length === 0) {
+				pushError(errors, `${subField}.after`, 'invalid_type', `${subField}.after: 必須為非空字串`);
+			} else if (!allActionIds.has(obj.after)) {
+				pushError(
+					errors,
+					`${subField}.after`,
+					'unknown_after',
+					`${subField}.after: 找不到同 phase 的動作「${obj.after}」`,
+					obj.after
+				);
+			} else if (obj.after === obj.action_id) {
+				pushError(
+					errors,
+					`${subField}.after`,
+					'self_after',
+					`${subField}.after: 不能指向自己`,
+					obj.after
+				);
+			}
 		}
 	});
 }
@@ -229,9 +257,9 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 		pushError(errors, 'scenario.crew', 'missing', 'scenario.crew: 缺少 lead/assist');
 	}
 
-	if (!Array.isArray(s.phases) || s.phases.length === 0) {
+	if (!s.hidden && (!Array.isArray(s.phases) || s.phases.length === 0)) {
 		pushError(errors, 'scenario.phases', 'empty_phases', 'scenario.phases: 必須至少一個 phase');
-	} else {
+	} else if (Array.isArray(s.phases)) {
 		const phaseIds = new Set<string>();
 		s.phases.forEach((p, i) => {
 			const path = `scenario.phases[${i}]`;
@@ -272,14 +300,14 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 
 	const declaredFlags = collectDeclaredFlags(s.phases);
 
-	if (!Array.isArray(s.outcomes) || s.outcomes.length === 0) {
+	if (!s.hidden && (!Array.isArray(s.outcomes) || s.outcomes.length === 0)) {
 		pushError(
 			errors,
 			'scenario.outcomes',
 			'empty_outcomes',
 			'scenario.outcomes: 必須至少一個 outcome'
 		);
-	} else {
+	} else if (Array.isArray(s.outcomes)) {
 		const outcomeIds = new Set<string>();
 		let hasDefault = false;
 		s.outcomes.forEach((o, i) => {

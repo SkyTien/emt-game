@@ -7,6 +7,8 @@
 	import { load as loadProgress, bestStarsForScenario } from '$lib/progress/store';
 	import StarBar from '$lib/ui/StarBar.svelte';
 
+	import { goto } from '$app/navigation';
+
 	const scenarios = loadScenarios();
 	let progress = $state(loadProgress());
 	onMount(() => (progress = loadProgress()));
@@ -15,6 +17,13 @@
 		const lead = bestStarsForScenario(progress, id, 'lead');
 		const assist = bestStarsForScenario(progress, id, 'assist');
 		return Math.max(lead, assist);
+	}
+
+	const OHCA_POOL = ['ohca_rosc_breathing', 'ohca_rosc_no_breathing', 'ohca_no_rosc'];
+
+	function playRandomOhca() {
+		const id = OHCA_POOL[Math.floor(Math.random() * OHCA_POOL.length)];
+		goto(`${base}/scenarios/${id}/role`);
 	}
 </script>
 
@@ -28,10 +37,15 @@
 		<p class="empty">{$_('menu.empty')}</p>
 	{:else}
 		<ul class="list">
+			<li>
+				<button class="row" onclick={playRandomOhca}>
+					<span class="title">{$_('menu.ohca_random')}</span>
+				</button>
+			</li>
 			{#each scenarios as s (s.id)}
 				{@const stars = bestForScenario(s.id)}
 				<li>
-					<a class="row" href={`${base}/scenarios/${s.id}/role`}>
+					<a class="row" href={s.player_role === 'either' ? `${base}/scenarios/${s.id}/role` : `${base}/scenarios/${s.id}/play`}>
 						<span class="title">{localize(s.title, $locale ?? 'zh-Hant')}</span>
 						<span class="stars">
 							{#if stars > 0}
@@ -83,6 +97,11 @@
 		text-decoration: none;
 		color: inherit;
 		min-height: 44px;
+		width: 100%;
+		border: none;
+		cursor: pointer;
+		font-size: inherit;
+		text-align: left;
 	}
 	.title {
 		font-weight: 600;

@@ -12,7 +12,7 @@ import {
 	validateTechnique,
 	type ValidationResult
 } from '../src/lib/data/validators';
-import type { Action } from '../src/lib/types/content';
+import type { Action, Scenario } from '../src/lib/types/content';
 
 const DATA_DIR = new URL('../data/', import.meta.url).pathname;
 
@@ -90,15 +90,36 @@ try {
 	allOk = false;
 }
 
+// 建立情境 id → raw 的 map，供繼承展開使用
+const scenarioRawMap = new Map<string, Scenario>();
+for (const f of scenarioFiles) {
+	const parsed = loadYaml<Scenario>(f.path);
+	if (parsed?.id) scenarioRawMap.set(parsed.id, parsed);
+}
+
+function resolveScenarioForValidation(raw: Scenario, map: Map<string, Scenario>): Scenario {
+	if (!raw.extends) return raw;
+	const parent = map.get(raw.extends);
+	if (!parent) return raw;
+	const resolvedParent = resolveScenarioForValidation(parent, map);
+	return {
+		...resolvedParent,
+		...raw,
+		phases: [...resolvedParent.phases, ...(raw.phases ?? [])],
+		extends: undefined
+	};
+}
+
 console.log('\n# Scenarios');
 for (const f of scenarioFiles) {
-	const parsed = loadYaml<unknown>(f.path);
+	const raw = loadYaml<Scenario>(f.path);
 	if (!registry) {
 		console.error(`  skip  ${f.rel}  (registry not built)`);
 		allOk = false;
 		continue;
 	}
-	const result = validateScenario(parsed, registry);
+	const resolved = resolveScenarioForValidation(raw, scenarioRawMap);
+	const result = validateScenario(resolved, registry);
 	if (!reportResult(f.rel, result)) allOk = false;
 }
 

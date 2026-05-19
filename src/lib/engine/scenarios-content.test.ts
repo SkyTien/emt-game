@@ -30,7 +30,7 @@ describe('hypoglycemia scenario — textbook outcome reachable', () => {
 		let t = 1;
 		for (const phase of scenario.phases) {
 			for (const req of phase.required) {
-				const by: ActorRole = req.by === 'partner' ? 'assist' : 'lead';
+				const by: ActorRole = req.by === 'assist' ? 'assist' : 'lead';
 				s = play(s, req.action_id, by, t++);
 			}
 		}
@@ -42,26 +42,25 @@ describe('hypoglycemia scenario — textbook outcome reachable', () => {
 });
 
 describe('ohca scenario — flow and outcomes', () => {
-	it('perfect path yields rosc', () => {
-		const scenario = getScenarioById('ohca_adult_street')!;
+	it('perfect path yields continued_cpr_good outcome', () => {
+		const scenario = getScenarioById('ohca_no_rosc')!;
 		let s = ScenarioEngine.init(scenario, 'lead', 0);
 		let t = 1;
 		for (const phase of scenario.phases) {
 			for (const req of phase.required) {
-				const by: ActorRole = req.by === 'partner' ? 'assist' : 'lead';
+				const by: ActorRole = req.by === 'assist' ? 'assist' : 'lead';
 				s = play(s, req.action_id, by, t++);
 			}
 		}
 		expect(s.flags.has('已電擊')).toBe(true);
-		expect(ScenarioEngine.getOutcome(s)?.id).toBe('rosc');
+		expect(ScenarioEngine.getOutcome(s)?.id).toBe('continued_cpr_good');
 	});
 
 	it('missing airway action prevents cpr phase completion', () => {
-		const scenario = getScenarioById('ohca_adult_street')!;
+		const scenario = getScenarioById('ohca_no_rosc')!;
 		const s0 = ScenarioEngine.init(scenario, 'lead', 0);
 		const cprIdx = scenario.phases.findIndex((p) => p.id === 'cpr');
 		expect(cprIdx).toBeGreaterThan(0);
-		// CPR phase requires open_airway_head_tilt — verify it's listed
 		const cpr = scenario.phases[cprIdx];
 		const ids = cpr.required.map((r) => r.action_id);
 		expect(ids).toContain('open_airway_head_tilt');
@@ -88,7 +87,7 @@ describe('motorcycle trauma scenario — phase split', () => {
 		let t = 1;
 		for (const phase of scenario.phases) {
 			for (const req of phase.required) {
-				const by: ActorRole = req.by === 'partner' ? 'assist' : 'lead';
+				const by: ActorRole = req.by === 'assist' ? 'assist' : 'lead';
 				s = play(s, req.action_id, by, t++);
 			}
 		}

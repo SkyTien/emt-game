@@ -1,0 +1,110 @@
+id: ohca_adult_street
+schema_version: 1
+hidden: true
+title:
+  zh-Hant: 路倒成人救護（基底）
+illustration: /illustrations/scenes/ohca_adult_street.png
+player_role: either
+patient_initial:
+  consciousness:
+    zh-Hant: 無反應
+  breath:
+    zh-Hant: 偶發喘息
+  pulse:
+    zh-Hant: 摸不到
+crew:
+  lead:
+    role: lead
+    carries:
+      - aed
+      - jumpkit
+    duty:
+      zh-Hant: 評估、CPR、ISBAR 交班
+  assist:
+    role: assist
+    carries:
+      - o2kit
+    duty:
+      zh-Hant: BVM 通氣、通報 119、OPA 置入、AED 操作
+phases:
+  - id: arrival
+    illustration: /illustrations/scenes/ohca_adult_street.png
+    narrative:
+      zh-Hant: 你抵達現場，公園步道旁有一名中年男子倒臥在地，周圍有兩三位民眾圍觀。
+    hint:
+      zh-Hant: 現場有民眾聚集，應優先確保評估現場安全並做好 BSI 防護；同時由副手立即通報 119。
+    required:
+      - action_id: check_scene_safe
+        by: lead
+      - action_id: wear_ppe
+        by: lead
+      - action_id: call_119_dispatch
+        by: assist
+    timeout: 30
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 沒先評估安全直接接觸，救護員自身可能受傷；BSI 也漏了。
+  - id: assess
+    narrative:
+      zh-Hant: 病人臉色蒼白、嘴唇發紺，對外部呼喚似乎沒有動作。
+    hint:
+      zh-Hant: 依照流程評估患者意識（AVPU），並同時檢查呼吸與頸動脈脈搏，確認是否為 OHCA。
+    required:
+      - action_id: check_consciousness_avpu
+        by: lead
+      - action_id: check_breath
+        by: lead
+        after: check_consciousness_avpu
+      - action_id: check_pulse_carotid
+        by: lead
+        after: check_breath
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 評估時間拖太久，延誤後續高品質 CPR。
+  - id: cpr
+    narrative:
+      zh-Hant: 確認患者無脈搏且無正常呼吸，已進入心肺停止狀態。主手立即開始胸外按壓；副手負責整個呼吸道：暢通呼吸道、置入口咽呼吸道（OPA）後以 EC 手法持續 BVM 通氣。
+    hint:
+      zh-Hant: 依 Compression-first 原則，主手立即開始高品質胸外按壓；副手暢通呼吸道，確認無作嘔反射後置入 OPA，再以 EC 手法持續 BVM 通氣，主手專注按壓減少中斷。
+    required:
+      - action_id: open_airway_head_tilt
+        by: assist
+      - action_id: insert_opa
+        by: assist
+        after: open_airway_head_tilt
+      - action_id: cpr_compress_adult
+        by: lead
+      - action_id: bvm_ventilate
+        by: assist
+        after: insert_opa
+    timeout: 60
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 每延遲 1 分鐘 CPR 存活率下降 7~10%。
+  - id: aed
+    narrative:
+      zh-Hant: 自動體外心臟電擊去顫器（AED）已送達。監測顯示心律為心室顫動（VF），屬可電擊心律。
+    hint:
+      zh-Hant: 本情境心律為 VF（可電擊）：應在減少按壓中斷的前提下，儘速貼上電極片並啟動分析，確認可電擊後立即執行電擊，電擊後立刻恢復 CPR。
+    required:
+      - action_id: aed_power_on
+        by: assist
+      - action_id: aed_attach
+        by: assist
+        after: aed_power_on
+      - action_id: aed_analyze
+        by: assist
+        after: aed_attach
+      - action_id: aed_shock
+        by: assist
+        after: aed_analyze
+        set_flag: 已電擊
+    timeout: 60
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: AED 操作延遲導致除顫時機錯過，VF 持續無灌流可能惡化為 asystole。

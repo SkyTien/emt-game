@@ -30,8 +30,8 @@ const baseScenario: Scenario = {
 			id: 'cpr',
 			narrative: { 'zh-Hant': 'CPR' },
 			required: [
-				{ action_id: 'cpr_compress_adult', by: 'player' },
-				{ action_id: 'bvm_ventilate', by: 'partner' }
+				{ action_id: 'cpr_compress_adult', by: 'lead' },
+				{ action_id: 'bvm_ventilate', by: 'assist' }
 			],
 			timeout: 60
 		},

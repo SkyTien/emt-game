@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
 	import { fade, fly } from 'svelte/transition';
+	import { untrack } from 'svelte';
 	import { ScenarioEngine } from '$lib/engine/scenario-engine';
+	import { findPartnerActions, findPlayerActions, pickPartnerDelayMs } from '$lib/engine/partner-ai';
 	import ActionList from '$lib/ui/ActionList.svelte';
 	import Toolbox from '$lib/ui/Toolbox.svelte';
 	import PatientStatus from '$lib/ui/PatientStatus.svelte';
 	import PhaseProgress from '$lib/ui/PhaseProgress.svelte';
 	import FeedbackOverlay from '$lib/ui/FeedbackOverlay.svelte';
+	import Toast from '$lib/ui/Toast.svelte';
 	import LogView from '$lib/ui/LogView.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Typewriter from '$lib/ui/Typewriter.svelte';
 	import type { ActorRole, ScenarioState, Location, Feedback } from '$lib/engine/scenario-engine';
-	import type { BagId } from '$lib/types/content';
+	import type { Action, BagId } from '$lib/types/content';
 
 	let { data } = $props();
 	const scenario = $derived(data.scenario);
@@ -21,11 +24,17 @@
 
 	$effect.pre(() => {
 		if (scenario) {
-			gameState = ScenarioEngine.init(scenario, 'lead', Date.now());
+			const storedRole = scenario.player_role === 'either'
+				? (sessionStorage.getItem(`emt1game:role:${scenario.id}`) ?? 'lead') as ActorRole
+				: scenario.player_role as ActorRole;
+			gameState = ScenarioEngine.init(scenario, storedRole, Date.now());
 		}
 	});
 
 	let lastFeedback = $state<Feedback | null>(null);
+	let feedbackKey = $state(0);
+	let toastQueue = $state<string[]>([]);
+	let toastKey = $state(0);
 	let showLog = $state(false);
 	let narrativeFinished = $state(false);
 
@@ -72,7 +81,7 @@
 		'check_scene_safe',
 		'wear_ppe',
 		'scene_traffic_control',
-		'call_113_dispatch',
+		'call_119_dispatch',
 		'declare_critical',
 		'declare_stable',
 		'isbar_handoff',
@@ -84,6 +93,32 @@
 	const assessmentActions = $derived(
 		allActions.filter((a) => a.bag === 'hand' && !SCENE_IDS.has(a.id))
 	);
+	const partnerActionIds = $derived(gameState ? findPartnerActions(gameState) : []);
+	const partnerActions = $derived<Action[]>(
+		partnerActionIds.map((id) => registry.tryById(id)).filter((a): a is Action => a !== null)
+	);
+
+	// 副手視角：主手（player）的動作由同伴 AI 自動延遲執行，每次只 schedule 第一個可執行動作
+	$effect(() => {
+		if (!gameState || gameState.finalOutcomeId) return;
+		if (gameState.playerRole !== 'assist') return;
+
+		const pendingIds = findPlayerActions(gameState);
+		if (pendingIds.length === 0) return;
+
+		const actionId = pendingIds[0];
+		const timer = setTimeout(() => {
+			untrack(() => {
+				const action = registry.tryById(actionId);
+				if (action) {
+					toastQueue = [...toastQueue, `主手：${action.label['zh-Hant']}`];
+				}
+				gameState = ScenarioEngine.performAction(gameState, actionId, gameState.playerRole === 'lead' ? 'assist' : 'lead', Date.now()).state;
+			});
+		}, pickPartnerDelayMs());
+
+		return () => clearTimeout(timer);
+	});
 
 	// Mock bag locations (everyone brings everything to scene for now)
 	const bagLocations = $derived({
@@ -101,6 +136,7 @@
 		const result = ScenarioEngine.performAction(gameState, action.id, by, Date.now());
 		gameState = result.state;
 		lastFeedback = result.feedback;
+		feedbackKey += 1;
 
 		// We intentionally DO NOT update currentNarrative to 'ok' / 'wrong_action' here.
 		// The FeedbackOverlay handles the correct/incorrect display.
@@ -217,8 +253,12 @@
 							{registry}
 							{bagLocations}
 							completedIds={gameState.completedRequiredIds}
-							partnerActions={[]}
+							{partnerActions}
 							onpick={(a) => handleAction(a.id, gameState.playerRole)}
+							ondirective={(a) => {
+								const partnerRole: ActorRole = gameState.playerRole === 'lead' ? 'assist' : 'lead';
+								handleAction(a.id, partnerRole);
+							}}
 						/>
 					</div>
 				</div>
@@ -256,7 +296,15 @@
 
 	<!-- 反饋層 -->
 	{#if lastFeedback}
-		<FeedbackOverlay correct={lastFeedback.correct} onClose={() => (lastFeedback = null)} />
+		{#key feedbackKey}
+			<FeedbackOverlay correct={lastFeedback.correct} onClose={() => (lastFeedback = null)} />
+		{/key}
+	{/if}
+
+	{#if toastQueue.length > 0}
+		{#key toastKey}
+			<Toast message={toastQueue[0]} onClose={() => { toastQueue = toastQueue.slice(1); toastKey += 1; }} />
+		{/key}
 	{/if}
 
 	<!-- 日誌疊層 -->

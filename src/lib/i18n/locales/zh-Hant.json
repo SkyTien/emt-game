@@ -22,7 +22,8 @@
 	"menu": {
 		"scenarios_title": "情境關卡",
 		"techniques_title": "單項關卡",
-		"empty": "目前沒有可玩的關卡"
+		"empty": "目前沒有可玩的關卡",
+		"ohca_random": "OHCA 情境演練"
 	},
 	"scenario": {
 		"role_select_title": "選擇你的角色",

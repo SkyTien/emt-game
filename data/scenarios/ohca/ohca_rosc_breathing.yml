@@ -1,0 +1,62 @@
+id: ohca_rosc_breathing
+schema_version: 1
+hidden: true
+extends: ohca_adult_street
+title:
+  zh-Hant: 路倒成人救護
+phases:
+  - id: post_aed_assess
+    narrative:
+      zh-Hant: 電擊後你立即恢復按壓。數輪 CPR 後，你摸到頸動脈出現規律跳動——病人有脈搏了。觀察胸廓，可見自主起伏。
+    hint:
+      zh-Hant: 確認 ROSC 後先摸脈搏、再評估呼吸；有自主呼吸則維持呼吸道暢通，密切監測生命徵象。
+    required:
+      - action_id: check_pulse_carotid
+        by: lead
+      - action_id: check_breath
+        by: lead
+        after: check_pulse_carotid
+    timeout: 30
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未再評估脈搏與呼吸，無法確認 ROSC 狀態。
+  - id: post_rosc_monitor
+    narrative:
+      zh-Hant: 病人恢復自主循環與呼吸，皮膚顏色逐漸改善。需持續監測並準備送醫。
+    hint:
+      zh-Hant: ROSC 後維持呼吸道暢通，監測血氧與脈搏，並準備 ISBAR 交班。
+    required:
+      - action_id: measure_spo2
+        by: lead
+      - action_id: check_pulse_carotid
+        by: lead
+      - action_id: isbar_handoff
+        by: lead
+    timeout: 60
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未持續監測或交班不完整，急診接手延誤。
+outcomes:
+  - id: full_rosc
+    when: 已電擊 且 正確率>=0.85
+    title:
+      zh-Hant: ROSC — 恢復自主循環與呼吸
+    text:
+      zh-Hant: 高品質 CPR 與適切電擊後，病人恢復自主循環與呼吸，送醫後神經功能完整。
+    illustration: /illustrations/outcomes/rosc.png
+  - id: rosc_poor
+    when: 已電擊
+    title:
+      zh-Hant: ROSC 但處置細節待加強
+    text:
+      zh-Hant: 病人雖恢復循環，但部分流程有延誤。請回顧時間軸找出可以改進的環節。
+    illustration: /illustrations/outcomes/cpr.png
+  - id: doa
+    when: 預設
+    title:
+      zh-Hant: 到院前 DOA
+    text:
+      zh-Hant: 多項關鍵動作延誤，病人到院前無生命徵象。請檢視時間軸看哪些步驟可以更快。
+    illustration: /illustrations/outcomes/doa.png

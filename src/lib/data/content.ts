@@ -14,7 +14,7 @@ const categoryFile = import.meta.glob('../../../data/actions/categories.yml', {
 	eager: true
 }) as Record<string, string>;
 
-const scenarioFiles = import.meta.glob('../../../data/scenarios/*.yml', {
+const scenarioFiles = import.meta.glob('../../../data/scenarios/**/*.yml', {
 	query: '?raw',
 	import: 'default',
 	eager: true
@@ -57,18 +57,50 @@ export function loadPhases(): ActionPhase[] {
 
 export function loadScenarios(): Scenario[] {
 	if (scenariosCache) return scenariosCache;
-	const list: Scenario[] = [];
+
+	// 第一輪：解析所有 YAML，建立 id → raw 的 map
+	const rawMap = new Map<string, Scenario>();
 	for (const text of Object.values(scenarioFiles)) {
 		const parsed = parseYaml(text) as Scenario;
-		if (parsed?.hidden) continue;
-		list.push(parsed);
+		if (parsed?.id) rawMap.set(parsed.id, parsed);
 	}
+
+	// 第二輪：展開繼承，組裝最終情境
+	const list: Scenario[] = [];
+	for (const raw of rawMap.values()) {
+		if (raw.hidden) continue;
+		const resolved = resolveScenario(raw, rawMap);
+		list.push(resolved);
+	}
+
 	scenariosCache = list;
 	return list;
 }
 
+function resolveScenario(raw: Scenario, map: Map<string, Scenario>): Scenario {
+	if (!raw.extends) return raw;
+
+	const parent = map.get(raw.extends);
+	if (!parent) return raw;
+
+	const resolvedParent = resolveScenario(parent, map);
+	return {
+		...resolvedParent,
+		...raw,
+		phases: [...resolvedParent.phases, ...(raw.phases ?? [])],
+		extends: undefined
+	};
+}
+
 export function getScenarioById(id: string): Scenario | null {
-	return loadScenarios().find((s) => s.id === id) ?? null;
+	const rawMap = new Map<string, Scenario>();
+	for (const text of Object.values(scenarioFiles)) {
+		const parsed = parseYaml(text) as Scenario;
+		if (parsed?.id) rawMap.set(parsed.id, parsed);
+	}
+	const raw = rawMap.get(id);
+	if (!raw) return null;
+	return resolveScenario(raw, rawMap);
 }
 
 export function loadTechniques(): Technique[] {

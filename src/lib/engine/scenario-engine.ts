@@ -137,7 +137,18 @@ export const ScenarioEngine = {
 
 		// Find matching required entry by ID
 		const required = phase.required.find((r) => r.action_id === actionId);
-		const isCorrect = Boolean(required) && roleMatches(required?.by, by, state.playerRole);
+		const prerequisiteMet = !required?.after || state.completedRequiredIds.has(required.after);
+		const isCorrect =
+			Boolean(required) &&
+			roleMatches(required?.by, by) &&
+			prerequisiteMet;
+
+		if (required && !prerequisiteMet) {
+			return {
+				state,
+				feedback: { correct: false, message: 'wrong_order' }
+			};
+		}
 
 		const next: ScenarioState = {
 			...state,
@@ -258,15 +269,11 @@ export const ScenarioEngine = {
 };
 
 function roleMatches(
-	required: 'player' | 'partner' | 'either' | undefined,
-	actual: ActorRole,
-	playerRole: ActorRole
+	required: 'lead' | 'assist' | undefined,
+	actual: ActorRole
 ): boolean {
-	if (!required || required === 'either') return true;
-	const partnerRole: ActorRole = playerRole === 'lead' ? 'assist' : 'lead';
-	if (required === 'player') return actual === playerRole;
-	if (required === 'partner') return actual === partnerRole;
-	return false;
+	if (!required) return true;
+	return actual === required;
 }
 
 function clonePatient(p: PatientVitals): PatientVitals {

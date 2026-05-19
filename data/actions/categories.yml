@@ -24,7 +24,7 @@ phases:
         icon: ScanFace
         actions:
           - check_consciousness_avpu
-          - call_113_dispatch
+          - call_119_dispatch
 
   - id: primary
     label: { zh-Hant: 初步評估 }

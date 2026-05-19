@@ -146,12 +146,14 @@ actions:
     explain:
       zh-Hant: SAMPLE 史:S/A/M/P/L/E,先問主訴與發病經過
 
-  - id: call_113_dispatch
+  - id: call_119_dispatch
     label: { zh-Hant: 通報通訊指揮中心 }
     bag: hand
     default_role: assist
     body_region: general
     icon: PhoneCall
+    explain:
+      zh-Hant: 撥打 119 通報消防救護通訊指揮中心，告知位置、病人狀況與初步評估結果
 
   # === 氣道/呼吸處置 ===
   - id: open_airway_head_tilt
@@ -251,6 +253,15 @@ actions:
     icon: Air
     explain:
       zh-Hant: 將鼻管置於患者鼻腔，給予低濃度氧氣，流量 1~6 L/min（對齊 EMT1Note）
+
+  - id: aed_power_on
+    label: { zh-Hant: 開啟 AED 電源 }
+    bag: aed
+    default_role: assist
+    body_region: chest
+    icon: Power
+    explain:
+      zh-Hant: 打開 AED 蓋子或按下電源鍵，等待語音提示後再進行後續操作
 
   - id: aed_attach
     label: { zh-Hant: 貼 AED 電擊片 }
