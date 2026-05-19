@@ -270,6 +270,8 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 		});
 	}
 
+	const declaredFlags = collectDeclaredFlags(s.phases);
+
 	if (!Array.isArray(s.outcomes) || s.outcomes.length === 0) {
 		pushError(
 			errors,
@@ -291,8 +293,19 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 			}
 			if (typeof o.when !== 'string' || o.when.length === 0) {
 				pushError(errors, `${path}.when`, 'empty_when', `${path}.when: 必須為非空字串`);
-			} else if (o.when.trim() === '預設') {
-				hasDefault = true;
+			} else {
+				if (o.when.trim() === '預設') hasDefault = true;
+				for (const flag of extractFlagTokens(o.when)) {
+					if (!declaredFlags.has(flag)) {
+						pushError(
+							errors,
+							`${path}.when`,
+							'undeclared_flag',
+							`${path}.when: 旗標「${flag}」未被任何 phase.required[*].set_flag 設定`,
+							flag
+						);
+					}
+				}
 			}
 			ensureLocalized(o.title, `${path}.title`, errors, warnings);
 			ensureLocalized(o.text, `${path}.text`, errors, warnings);
@@ -308,6 +321,69 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 	}
 
 	return { ok: errors.length === 0, errors, warnings };
+}
+
+const FLAG_RESERVED = new Set(['預設', '且', '或']);
+const FLAG_METRIC_PREFIXES = ['正確率', '惡化等級'];
+
+function isMetricOrReserved(token: string): boolean {
+	if (FLAG_RESERVED.has(token)) return true;
+	for (const prefix of FLAG_METRIC_PREFIXES) {
+		if (token.startsWith(prefix)) return true;
+	}
+	return false;
+}
+
+export function extractFlagTokens(expr: string): string[] {
+	const tokens: string[] = [];
+	let i = 0;
+	const input = expr;
+	while (i < input.length) {
+		const ch = input[i];
+		if (ch === ' ' || ch === '\t' || ch === '(' || ch === ')' || ch === '(' || ch === ')') {
+			i += 1;
+			continue;
+		}
+		if (ch === '或' || ch === '且') {
+			i += 1;
+			continue;
+		}
+		let end = i;
+		while (
+			end < input.length &&
+			input[end] !== ' ' &&
+			input[end] !== '\t' &&
+			input[end] !== '或' &&
+			input[end] !== '且' &&
+			input[end] !== '(' &&
+			input[end] !== '(' &&
+			input[end] !== ')' &&
+			input[end] !== ')'
+		) {
+			end += 1;
+		}
+		const token = input.slice(i, end);
+		if (token && !isMetricOrReserved(token)) {
+			tokens.push(token);
+		}
+		i = end;
+	}
+	return tokens;
+}
+
+function collectDeclaredFlags(phases: Scenario['phases'] | undefined): Set<string> {
+	const out = new Set<string>();
+	if (!Array.isArray(phases)) return out;
+	for (const p of phases) {
+		if (!p || !Array.isArray(p.required)) continue;
+		for (const req of p.required) {
+			if (req && typeof req === 'object') {
+				const flag = (req as { set_flag?: unknown }).set_flag;
+				if (typeof flag === 'string' && flag.length > 0) out.add(flag);
+			}
+		}
+	}
+	return out;
 }
 
 export function validateTechnique(input: unknown, registry: ActionRegistry): ValidationResult {

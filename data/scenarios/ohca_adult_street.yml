@@ -44,12 +44,14 @@ phases:
     narrative:
       zh-Hant: 病人臉色蒼白、嘴唇發紺，對外部呼喚似乎沒有動作。
     hint:
-      zh-Hant: 請依照流程評估患者意識(AVPU)，並同時檢查呼吸與頸動脈脈搏。
+      zh-Hant: 請依照流程評估患者意識(AVPU)，並同時檢查呼吸與頸動脈脈搏；確認 OHCA 應立即由副手通報。
     required:
       - action_id: check_consciousness_avpu
       - action_id: check_breath
       - action_id: check_pulse_carotid
-    timeout: 30
+      - action_id: call_113_dispatch
+        by: partner
+    timeout: 45
     on_skip:
       worsen: 1
       note:
@@ -58,12 +60,14 @@ phases:
     narrative:
       zh-Hant: 確認患者無脈搏且無正常呼吸，已進入心肺停止狀態。
     hint:
-      zh-Hant: 應立即開始高品質胸外按壓，並與夥伴搭配 BVM 給氧。
+      zh-Hant: 先暢通呼吸道並置入口咽呼吸道，再開始高品質胸外按壓並與夥伴搭配 BVM 給氧。
     required:
+      - action_id: open_airway_head_tilt
+        by: player
+      - action_id: insert_opa
+        by: player
       - action_id: cpr_compress_adult
         by: player
-      - action_id: call_113_dispatch
-        by: partner
       - action_id: bvm_ventilate
         by: partner
     timeout: 60
@@ -78,8 +82,11 @@ phases:
       zh-Hant: 應在減少按壓中斷的前提下，儘速貼上電擊片並啟動分析。
     required:
       - action_id: aed_attach
+        by: partner
       - action_id: aed_analyze
+        by: partner
       - action_id: aed_shock
+        by: partner
         set_flag: 已電擊
     timeout: 60
     on_skip:
@@ -102,11 +109,11 @@ phases:
         zh-Hant: 交班不完整,急診接手延誤後續處置。
 outcomes:
   - id: rosc
-    when: 正確率>=0.9 且 已電擊
+    when: 正確率>=0.9
     title:
       zh-Hant: ROSC — 病人恢復自主循環
     text:
-      zh-Hant: 在你高品質的 CPR 與適時除顫下,病人恢復自主循環,送醫後神經功能完整。
+      zh-Hant: 在你高品質的 CPR、暢通呼吸道與適切的 AED 操作下,病人恢復自主循環,送醫後神經功能完整。涵蓋可電擊(VF/pVT)與非可電擊(PEA/asystole)兩種心律。
     illustration: /illustrations/outcomes/rosc.png
   - id: continued_cpr
     when: 已電擊

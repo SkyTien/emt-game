@@ -43,3 +43,4 @@ playwright/.cache/
 
 # Claude Code local settings(不含專案共用)
 .claude/settings.local.json
+.gitnexus

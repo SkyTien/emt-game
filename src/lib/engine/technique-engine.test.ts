@@ -137,9 +137,9 @@ describe('TechniqueEngine.performAction — label-based step matching (Task 5.6)
 		]
 	};
 
-	it('advances on correct action label', () => {
+	it('advances on correct action_id', () => {
 		const s0 = TechniqueEngine.init(techLabelBased);
-		const r = TechniqueEngine.performAction(s0, '徒手固定頭部');
+		const r = TechniqueEngine.performAction(s0, 'manual_inline_stabilization');
 		expect(r.feedback.correct).toBe(true);
 		expect(r.state.stepIndex).toBe(1);
 	});

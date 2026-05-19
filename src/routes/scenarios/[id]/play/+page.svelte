@@ -66,11 +66,23 @@
 	});
 
 	const allActions = $derived(registry.all());
-	const sceneActions = $derived(
-		allActions.filter((a) => a.bag === 'hand' && a.body_region === 'general')
-	);
+
+	// Scene tab：現場 / 行政 / 危急判定 / 後送
+	const SCENE_IDS = new Set([
+		'check_scene_safe',
+		'wear_ppe',
+		'scene_traffic_control',
+		'call_113_dispatch',
+		'declare_critical',
+		'declare_stable',
+		'isbar_handoff',
+		'load_into_ambulance',
+		'transport_to_hospital'
+	]);
+
+	const sceneActions = $derived(allActions.filter((a) => SCENE_IDS.has(a.id)));
 	const assessmentActions = $derived(
-		allActions.filter((a) => a.bag === 'hand' && a.body_region !== 'general')
+		allActions.filter((a) => a.bag === 'hand' && !SCENE_IDS.has(a.id))
 	);
 
 	// Mock bag locations (everyone brings everything to scene for now)
@@ -86,7 +98,7 @@
 		const action = registry.tryById(actionId);
 		if (!action) return;
 
-		const result = ScenarioEngine.performAction(gameState, action.label['zh-Hant'], by, Date.now());
+		const result = ScenarioEngine.performAction(gameState, action.id, by, Date.now());
 		gameState = result.state;
 		lastFeedback = result.feedback;
 

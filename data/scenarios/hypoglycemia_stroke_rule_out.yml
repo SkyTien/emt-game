@@ -72,6 +72,7 @@ phases:
     required:
       - action_id: sample_history
       - action_id: blood_glucose_test
+        set_flag: 已測血糖
     timeout: 60
   - id: determine_criticality
     narrative:
@@ -94,12 +95,12 @@ phases:
     timeout: 90
   - id: intervention
     narrative:
-      zh-Hant: G-FAST 三項均無明顯異常。患者仍意識模糊，皮膚持續濕冷。
+      zh-Hant: G-FAST 三項均無明顯異常。患者仍意識模糊，皮膚持續濕冷。血氧 96%，依規範不需例行氧療。
     hint:
       zh-Hant: 依照評估結果，給予適當的低血糖處置與支持性治療。
     required:
       - action_id: oral_glucose_give
-      - action_id: nasal_cannula_oxygen
+        set_flag: 已給葡萄糖
     timeout: 45
   - id: transport
     narrative:

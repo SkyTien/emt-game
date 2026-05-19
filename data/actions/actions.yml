@@ -5,13 +5,13 @@
 #   bag: hand / o2kit / jumpkit / aed / vehicle
 #   default_role: lead / assist / either(可省略)
 #   body_region: head / neck / chest / wrist / abdomen / leg / arm / general
-#   icon: 路徑(可省)
+#   icon: Lucide icon 名稱(可省,預設 CircleDot),參考 https://lucide.dev/icons/
 #   explain: 時間軸回顧顯示的講解,locale map(可省)
 #
 # 維護者注意:
 #   - id 一旦發布,不可亂改,會破壞既有 YAML 引用
 #   - label.zh-Hant 必須與所有 scenario.required 欄位完全一致
-#   - 新增動作時請補對應的視覺 icon(static/illustrations/actions/<id>.svg)
+#   - icon 使用 Lucide 圖示名稱(CamelCase),不需放 SVG 檔案
 
 actions:
   # === 共通評估 ===
@@ -62,7 +62,7 @@ actions:
   - id: check_airway
     label: { zh-Hant: 確認氣道暢通 }
     bag: hand
-    body_region: neck
+    body_region: head
     icon: Wind
     explain:
       zh-Hant: 確認是否有異物或壓迫,有無異常呼吸音
@@ -141,7 +141,7 @@ actions:
     label: { zh-Hant: 詢問主訴 }
     bag: hand
     default_role: lead
-    body_region: head
+    body_region: general
     icon: MessageCircle
     explain:
       zh-Hant: SAMPLE 史:S/A/M/P/L/E,先問主訴與發病經過
@@ -153,6 +153,70 @@ actions:
     body_region: general
     icon: PhoneCall
 
+  # === 氣道/呼吸處置 ===
+  - id: open_airway_head_tilt
+    label: { zh-Hant: 壓額抬下顎 }
+    bag: hand
+    default_role: lead
+    body_region: head
+    icon: Wind
+    explain:
+      zh-Hant: 非外傷病人首選:一手壓額、一手抬下顎,使頭部後仰打開氣道
+
+  - id: open_airway_jaw_thrust
+    label: { zh-Hant: 下顎推舉 }
+    bag: hand
+    default_role: lead
+    body_region: head
+    icon: Wind
+    explain:
+      zh-Hant: 疑似頸椎傷時使用:雙手大拇指置於兩側下顎角,向前上推,不後仰頭部
+
+  - id: insert_opa
+    label: { zh-Hant: 置入口咽呼吸道 OPA }
+    bag: jumpkit
+    default_role: lead
+    body_region: head
+    icon: Wind
+    explain:
+      zh-Hant: 無意識且無作嘔反射者使用;尺寸由口角量到耳垂,反向置入再旋轉到位
+
+  - id: suction_airway
+    label: { zh-Hant: 抽吸呼吸道分泌物 }
+    bag: jumpkit
+    default_role: lead
+    body_region: head
+    icon: Wind
+    explain:
+      zh-Hant: 每次抽吸 < 15 秒,先給氧再抽吸,避免低血氧
+
+  - id: oxygen_simple_mask
+    label: { zh-Hant: 簡單面罩給氧 }
+    bag: o2kit
+    default_role: assist
+    body_region: head
+    icon: Air
+    explain:
+      zh-Hant: 流量 6~10 L/min,適用中度呼吸窘迫,FiO₂ 約 40~60%
+
+  - id: oxygen_nrm
+    label: { zh-Hant: 非再呼吸面罩給氧 NRM }
+    bag: o2kit
+    default_role: assist
+    body_region: head
+    icon: Air
+    explain:
+      zh-Hant: 流量 10~15 L/min,先脹滿儲氧袋,FiO₂ 可達 90% 以上,適用嚴重缺氧/創傷
+
+  - id: assess_exposure
+    label: { zh-Hant: E 暴露評估 }
+    bag: hand
+    default_role: lead
+    body_region: general
+    icon: ClipboardCheck
+    explain:
+      zh-Hant: 暴露/環境檢視:必要時掀開衣物找隱性傷口,評估後注意保暖避免失溫
+
   # === CPR / AED ===
   - id: cpr_compress_adult
     label: { zh-Hant: 成人胸外按壓 }
@@ -161,7 +225,7 @@ actions:
     body_region: chest
     icon: HeartPulse
     explain:
-      zh-Hant: 速率 100~120 次/分,深度 5~6 cm,完全回彈,中斷不超過 10 秒
+      zh-Hant: 速率 100~120 次/分,深度 ≥ 5 cm,完全回彈,中斷不超過 10 秒
 
   - id: bvm_ventilate
     label: { zh-Hant: BVM 給氧通氣 }
@@ -170,7 +234,7 @@ actions:
     body_region: head
     icon: Air
     explain:
-      zh-Hant: 30:2 或 10 秒一次(高級氣道下),避免過度通氣
+      zh-Hant: 30:2 或 10 秒一次(高級氣道下),僅壓 1/3 球,避免過度通氣
 
   - id: connect_o2
     label: { zh-Hant: 接氧氣瓶 }
@@ -186,7 +250,7 @@ actions:
     body_region: head
     icon: Air
     explain:
-      zh-Hant: 將鼻管置於患者鼻腔，給予低濃度氧氣，流量通常 1~4 L/min
+      zh-Hant: 將鼻管置於患者鼻腔，給予低濃度氧氣，流量 1~6 L/min（對齊 EMT1Note）
 
   - id: aed_attach
     label: { zh-Hant: 貼 AED 電擊片 }
@@ -200,14 +264,14 @@ actions:
   - id: aed_analyze
     label: { zh-Hant: 啟動 AED 分析 }
     bag: aed
-    default_role: lead
+    default_role: assist
     body_region: chest
     icon: Search
 
   - id: aed_shock
     label: { zh-Hant: AED 電擊 }
     bag: aed
-    default_role: lead
+    default_role: assist
     body_region: chest
     icon: Zap
     explain:
@@ -251,8 +315,8 @@ actions:
 
   - id: control_bleeding_pressure
     label: { zh-Hant: 直接加壓止血 }
-    bag: jumpkit
-    body_region: leg
+    bag: hand
+    body_region: general
     icon: Droplet
     explain:
       zh-Hant: 紗布或乾淨布料覆蓋傷口,以掌根直接加壓
@@ -260,7 +324,7 @@ actions:
   - id: splint_extremity
     label: { zh-Hant: 副木固定肢體 }
     bag: jumpkit
-    body_region: leg
+    body_region: general
     icon: Bone
     explain:
       zh-Hant: 固定範圍涵蓋傷處上下兩個關節
@@ -314,7 +378,7 @@ actions:
     label: { zh-Hant: 口服葡萄糖 }
     bag: jumpkit
     default_role: lead
-    body_region: head
+    body_region: general
     icon: Utensils
     explain:
       zh-Hant: 病人意識清楚且能吞嚥才可給予,昏迷者禁口服

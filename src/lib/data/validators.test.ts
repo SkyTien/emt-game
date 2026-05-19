@@ -57,14 +57,14 @@ const goodScenario: Scenario = {
 		{
 			id: 'arrival',
 			narrative: { 'zh-Hant': '抵達現場' },
-			required: [{ action: '評估現場安全' }],
+			required: [{ action_id: 'check_scene_safe' }],
 			timeout: 30,
 			on_skip: { worsen: 1, note: { 'zh-Hant': '忘了觀察交通' } }
 		},
 		{
 			id: 'cpr',
 			narrative: { 'zh-Hant': '開始 CPR' },
-			required: [{ action: '心臟按壓' }],
+			required: [{ action_id: 'cpr_compress' }],
 			timeout: 60
 		}
 	],
@@ -92,10 +92,12 @@ const goodTechnique: Technique = {
 	steps: [
 		{
 			id: 'pick_size',
+			action_id: 'cervical_collar_pick',
 			tip: { 'zh-Hant': '量下顎到肩膀指距' }
 		},
 		{
-			id: 'apply'
+			id: 'apply',
+			action_id: 'cervical_collar_apply'
 		}
 	]
 };
@@ -179,7 +181,7 @@ describe('validateScenario', () => {
 
 	it('rejects required action that registry cannot resolve', () => {
 		const bad = structuredClone(goodScenario);
-		bad.phases[0].required = [{ action: '不存在的動作' }];
+		bad.phases[0].required = [{ action_id: 'nonexistent_action' }];
 		const r = validateScenario(bad, reg);
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'unknown_action')).toBe(true);
@@ -235,82 +237,10 @@ describe('validateTechnique', () => {
 	});
 });
 
-describe('validateScenario - deprecated label warnings (task 3.5)', () => {
+describe('validateScenario - action_id format', () => {
 	const reg = makeRegistry();
 
-	it('warns when scenario required uses only label (old format)', () => {
-		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action: '評估現場安全' }];
-		scenario.phases[1].required = [{ action: '心臟按壓' }];
-		const r = validateScenario(scenario, reg);
-		expect(r.ok).toBe(true);
-		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
-	});
-
-	it('does not warn when scenario required uses action_id (new format)', () => {
-		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action_id: 'check_scene_safe' }];
-		scenario.phases[1].required = [{ action_id: 'cpr_compress' }];
-		const r = validateScenario(scenario, reg);
-		expect(r.ok).toBe(true);
-		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
-		expect(deprecatedWarnings).toHaveLength(0);
-	});
-
-	it('does not warn when scenario required uses both (action_id takes precedence)', () => {
-		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action_id: 'check_scene_safe', action: '評估現場安全' }];
-		scenario.phases[1].required = [{ action_id: 'cpr_compress', action: '心臟按壓' }];
-		const r = validateScenario(scenario, reg);
-		expect(r.ok).toBe(true);
-		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
-		expect(deprecatedWarnings).toHaveLength(0);
-	});
-});
-
-describe('validateTechnique - deprecated label warnings (task 3.5)', () => {
-	const reg = makeRegistry();
-
-	it('warns when technique step uses only label (old format)', () => {
-		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = { id: 'step1', action: '挑選頸圈尺寸' };
-		technique.steps[1] = { id: 'step2', action: '套上頸圈' };
-		const r = validateTechnique(technique, reg);
-		expect(r.ok).toBe(true);
-		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
-	});
-
-	it('does not warn when technique step uses action_id (new format)', () => {
-		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = { id: 'step1', action_id: 'cervical_collar_pick' };
-		technique.steps[1] = { id: 'step2', action_id: 'cervical_collar_apply' };
-		const r = validateTechnique(technique, reg);
-		expect(r.ok).toBe(true);
-		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
-		expect(deprecatedWarnings).toHaveLength(0);
-	});
-
-	it('does not warn when technique step uses both (action_id takes precedence)', () => {
-		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = {
-			id: 'step1',
-			action_id: 'cervical_collar_pick'
-		};
-		technique.steps[1] = {
-			id: 'step2',
-			action_id: 'cervical_collar_apply'
-		};
-		const r = validateTechnique(technique, reg);
-		expect(r.ok).toBe(true);
-		const deprecatedWarnings = r.warnings.filter((w) => w.code === 'deprecated_action_label');
-		expect(deprecatedWarnings).toHaveLength(0);
-	});
-});
-
-describe('validateScenario - both formats (task 3.6)', () => {
-	const reg = makeRegistry();
-
-	it('accepts scenario with action_id only (new format)', () => {
+	it('accepts scenario with action_id', () => {
 		const scenario = structuredClone(goodScenario);
 		scenario.phases[0].required = [{ action_id: 'check_scene_safe' }];
 		scenario.phases[1].required = [{ action_id: 'cpr_compress' }];
@@ -319,24 +249,7 @@ describe('validateScenario - both formats (task 3.6)', () => {
 		expect(r.errors).toHaveLength(0);
 	});
 
-	it('accepts scenario with action only (old format with warning)', () => {
-		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action: '評估現場安全' }];
-		const r = validateScenario(scenario, reg);
-		expect(r.ok).toBe(true);
-		expect(r.errors).toHaveLength(0);
-		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
-	});
-
-	it('accepts scenario with both fields present (prefer action_id)', () => {
-		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action_id: 'check_scene_safe', action: '評估現場安全' }];
-		const r = validateScenario(scenario, reg);
-		expect(r.ok).toBe(true);
-		expect(r.errors).toHaveLength(0);
-	});
-
-	it('rejects required entry with neither action nor action_id', () => {
+	it('rejects required entry without action_id', () => {
 		const scenario = structuredClone(goodScenario);
 		scenario.phases[0].required = [{ by: 'player' } as never];
 		const r = validateScenario(scenario, reg);
@@ -344,19 +257,19 @@ describe('validateScenario - both formats (task 3.6)', () => {
 		expect(r.errors.some((e) => e.code === 'invalid_type')).toBe(true);
 	});
 
-	it('rejects required entry with empty action and action_id', () => {
+	it('rejects required entry with empty action_id', () => {
 		const scenario = structuredClone(goodScenario);
-		scenario.phases[0].required = [{ action: '', action_id: '' }];
+		scenario.phases[0].required = [{ action_id: '' }];
 		const r = validateScenario(scenario, reg);
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'invalid_type')).toBe(true);
 	});
 });
 
-describe('validateTechnique - both formats (task 3.6)', () => {
+describe('validateTechnique - action_id format', () => {
 	const reg = makeRegistry();
 
-	it('accepts technique with action_id only (new format)', () => {
+	it('accepts technique with action_id', () => {
 		const technique = structuredClone(goodTechnique);
 		technique.steps[0] = { id: 'step1', action_id: 'cervical_collar_pick' };
 		technique.steps[1] = { id: 'step2', action_id: 'cervical_collar_apply' };
@@ -365,27 +278,7 @@ describe('validateTechnique - both formats (task 3.6)', () => {
 		expect(r.errors).toHaveLength(0);
 	});
 
-	it('accepts technique with action only (old format with warning)', () => {
-		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = { id: 'step1', action: '挑選頸圈尺寸' };
-		const r = validateTechnique(technique, reg);
-		expect(r.ok).toBe(true);
-		expect(r.errors).toHaveLength(0);
-		expect(r.warnings.some((w) => w.code === 'deprecated_action_label')).toBe(true);
-	});
-
-	it('accepts technique with both fields present (prefer action_id)', () => {
-		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = {
-			id: 'step1',
-			action_id: 'cervical_collar_pick'
-		};
-		const r = validateTechnique(technique, reg);
-		expect(r.ok).toBe(true);
-		expect(r.errors).toHaveLength(0);
-	});
-
-	it('rejects step with neither action nor action_id', () => {
+	it('rejects step without action_id', () => {
 		const technique = structuredClone(goodTechnique);
 		technique.steps[0] = { id: 'step1', tip: { 'zh-Hant': 'test' } } as never;
 		const r = validateTechnique(technique, reg);
@@ -393,9 +286,9 @@ describe('validateTechnique - both formats (task 3.6)', () => {
 		expect(r.errors.some((e) => e.code === 'missing_action')).toBe(true);
 	});
 
-	it('rejects step with empty action and action_id', () => {
+	it('rejects step with empty action_id', () => {
 		const technique = structuredClone(goodTechnique);
-		technique.steps[0] = { id: 'step1', action: '', action_id: '' };
+		technique.steps[0] = { id: 'step1', action_id: '' };
 		const r = validateTechnique(technique, reg);
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'missing_action')).toBe(true);

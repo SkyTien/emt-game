@@ -83,6 +83,20 @@
 	</g>
 
 	<g
+		id="arm"
+		class="region"
+		class:highlight={highlight === 'arm'}
+		role="button"
+		tabindex="0"
+		aria-label={$_('scenario.arm')}
+		onclick={pick('arm')}
+		onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && pick('arm')()}
+	>
+		<rect x="38" y="95" width="30" height="22" fill="transparent" />
+		<rect x="132" y="95" width="30" height="22" fill="transparent" />
+	</g>
+
+	<g
 		id="abdomen"
 		class="region"
 		class:highlight={highlight === 'abdomen'}
@@ -114,7 +128,7 @@
 <style>
 	.figure {
 		width: 100%;
-		max-width: 240px;
+		max-width: 480px;
 		height: auto;
 		display: block;
 		margin: 0 auto;

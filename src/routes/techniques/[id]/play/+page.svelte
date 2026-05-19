@@ -47,7 +47,7 @@
 
 	function onPick(action: Action) {
 		if (!gameState || !technique) return;
-		const r = TechniqueEngine.performAction(gameState, action.label['zh-Hant']);
+		const r = TechniqueEngine.performAction(gameState, action.id);
 		gameState = r.state;
 		lastTip = r.feedback.tip;
 

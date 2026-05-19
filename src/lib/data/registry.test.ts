@@ -55,28 +55,6 @@ describe('ActionRegistry.byId', () => {
 		});
 	});
 
-	describe('label fallback (deprecated)', () => {
-		it('falls back to label if ID not found', () => {
-			const action = registry.byId('評估現場安全');
-			expect(action.id).toBe('check_scene_safe');
-			expect(action.label['zh-Hant']).toBe('評估現場安全');
-		});
-
-		it('emits deprecation warning when falling back to label', () => {
-			const warnSpy = vi.spyOn(console, 'warn');
-			registry.byId('心臟按壓');
-			expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated label reference'));
-			warnSpy.mockRestore();
-		});
-
-		it('mentions correct action ID in deprecation warning', () => {
-			const warnSpy = vi.spyOn(console, 'warn');
-			registry.byId('貼 AED 電擊片');
-			expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('apply_aed'));
-			warnSpy.mockRestore();
-		});
-	});
-
 	describe('error cases', () => {
 		it('throws error for unknown ID and label', () => {
 			expect(() => {

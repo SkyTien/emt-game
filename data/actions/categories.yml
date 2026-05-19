@@ -45,15 +45,18 @@ phases:
           - cervical_collar_apply
 
       - id: xabc
-        label: { zh-Hant: X-A-B-C }
+        label: { zh-Hant: X-A-B-C-D-E }
         icon: ClipboardCheck
         actions:
           - control_bleeding_pressure   # X 大量出血
           - check_airway                # A 呼吸道
+          - open_airway_head_tilt       # A 壓額抬下顎
+          - open_airway_jaw_thrust      # A 下顎推舉
           - check_breath                # B 呼吸
           - check_pulse_carotid         # C 頸動脈
           - check_pulse_radial          # C 橈動脈
           - check_skin_signs            # C/E 皮膚
+          - assess_exposure             # E 暴露評估
           - assess_abc
 
       - id: ancillary
@@ -65,8 +68,6 @@ phases:
           - blood_glucose_test
           - check_pupils
           - stroke_cps_assess
-          - connect_o2
-          - bvm_ventilate
 
   - id: critical_decision
     label: { zh-Hant: 判斷危急度 }
@@ -114,6 +115,13 @@ phases:
           - control_bleeding_pressure
           - splint_extremity
           - long_board_immobilize
+          - connect_o2
+          - bvm_ventilate
+          - nasal_cannula_oxygen
+          - oxygen_simple_mask
+          - oxygen_nrm
+          - insert_opa
+          - suction_airway
 
       - id: transport
         label: { zh-Hant: 移送 }

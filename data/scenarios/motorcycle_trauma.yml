@@ -54,34 +54,98 @@ phases:
       worsen: 2
       note:
         zh-Hant: 沒固定頸椎就移動病人,可能造成脊髓損傷。
-  - id: abc
+  - id: bleeding_x
     narrative:
-      zh-Hant: 病人雖然有反應但顯得相當嗜睡，處於危急狀態。
+      zh-Hant: 快速目視全身發現右大腿外側有明顯大量出血。
     hint:
-      zh-Hant: 應快速執行 ABC 評估，並立即給予高濃度氧氣治療。
+      zh-Hant: 創傷流程的 X(eXsanguinating)優先,先壓制致命性出血,再進入 ABC。
     required:
-      - action_id: assess_abc
-      - action_id: connect_o2
+      - action_id: control_bleeding_pressure
+        by: player
+    timeout: 45
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 未先處理大量出血,休克快速進展。
+  - id: airway
+    narrative:
+      zh-Hant: 出血已初步壓制。病人嗜睡,呼吸道內似有少量血絲與口水。
+    hint:
+      zh-Hant: 創傷疑似頸椎傷,以下顎推舉打開氣道而非後仰頭部。
+    required:
+      - action_id: check_airway
+      - action_id: open_airway_jaw_thrust
+        by: player
+    timeout: 45
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 氣道未維持,缺氧加劇腦損傷。
+  - id: breathing
+    narrative:
+      zh-Hant: 氣道暢通,呼吸 24 次/分、略淺。
+    hint:
+      zh-Hant: 創傷病人應立即以 NRM 給予高濃度氧氣。
+    required:
+      - action_id: check_breath
+      - action_id: oxygen_nrm
         by: partner
     timeout: 45
     on_skip:
       worsen: 1
       note:
-        zh-Hant: 創傷病人未及時給高濃度氧,組織灌流惡化。
+        zh-Hant: 未給高濃度氧,組織灌流惡化。
+  - id: circulation
+    narrative:
+      zh-Hant: 病人皮膚蒼白濕冷,橈動脈微弱快速。
+    hint:
+      zh-Hant: 確認循環徵象並準備後續處置。
+    required:
+      - action_id: check_pulse_radial
+      - action_id: check_skin_signs
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未掌握循環徵象,延誤休克判斷。
+  - id: disability
+    narrative:
+      zh-Hant: 進入 D 神經評估,確認意識與瞳孔。
+    hint:
+      zh-Hant: 檢查瞳孔對光反應與大小對稱,評估中樞神經狀況。
+    required:
+      - action_id: check_pupils
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未評估瞳孔,失去顱內變化的指標。
+  - id: exposure
+    narrative:
+      zh-Hant: 進入 E 暴露評估,檢查其他隱性傷口。
+    hint:
+      zh-Hant: 必要時掀開衣物找隱性傷口,評估後注意保暖。
+    required:
+      - action_id: assess_exposure
+        by: player
+    timeout: 45
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 未做暴露評估,漏掉其他傷處或失溫。
   - id: bleeding_splint
     narrative:
-      zh-Hant: 檢查發現病人右大腿外側有大片出血，且右小腿呈現明顯變形。
+      zh-Hant: 完成初評後,進一步固定骨折部位減少二次傷。
     hint:
-      zh-Hant: 應先針對活動性出血進行止血處理，並對骨折部位進行固定以減少二次傷。
+      zh-Hant: 二度評估後針對骨折部位進行副木固定。
     required:
       - action_id: secondary_survey
-      - action_id: control_bleeding_pressure
       - action_id: splint_extremity
     timeout: 90
     on_skip:
-      worsen: 2
+      worsen: 1
       note:
-        zh-Hant: 未及時止血與固定,出血性休克進展。
+        zh-Hant: 未及時固定,移送途中骨折錯位惡化。
   - id: collar_board
     narrative:
       zh-Hant: 出血已初步控制，準備進行長距離移送前的固定。
