@@ -9,12 +9,14 @@
 	import IllustrationSlot from '$lib/ui/IllustrationSlot.svelte';
 
 	type LastResult = {
+		version: 1;
 		outcomeId: string;
 		correctActions: number;
 		wrongActions: number;
 		worsenLevel: number;
 		stars: number;
 		role: 'lead' | 'assist';
+		startTimeMs: number;
 		log: {
 			kind: string;
 			tMs: number;
@@ -30,11 +32,28 @@
 
 	const scenario = getScenarioById(page.params.id ?? '');
 	let result: LastResult | null = $state(null);
+	let loaded = $state(false);
 	let showTimeline = $state(false);
 
 	onMount(() => {
-		const raw = sessionStorage.getItem(`emt1game:lastResult:${page.params.id}`);
-		if (raw) result = JSON.parse(raw) as LastResult;
+		try {
+			const raw = sessionStorage.getItem(`emt1game:lastResult:${page.params.id}`);
+			if (!raw) return;
+			const parsed = JSON.parse(raw) as Partial<LastResult>;
+			if (
+				parsed.version === 1 &&
+				typeof parsed.outcomeId === 'string' &&
+				typeof parsed.stars === 'number' &&
+				typeof parsed.startTimeMs === 'number' &&
+				Array.isArray(parsed.log)
+			) {
+				result = parsed as LastResult;
+			}
+		} catch {
+			result = null;
+		} finally {
+			loaded = true;
+		}
 	});
 
 	const outcome = $derived(
@@ -53,8 +72,11 @@
 		<h1>{$_('result.scenario_title')}</h1>
 	</header>
 
-	{#if !scenario || !result}
+	{#if !loaded}
 		<p>{$_('common.loading')}</p>
+	{:else if !scenario || !result}
+		<p>{$_('result.unavailable')}</p>
+		<a class="btn ghost" href={`${base}/scenarios`}>{$_('result.return_menu')}</a>
 	{:else}
 		<IllustrationSlot src={outcome?.illustration} alt={outcome?.title['zh-Hant'] ?? ''} />
 		{#if outcome}
@@ -90,7 +112,8 @@
 			<ol class="timeline">
 				{#each result.log as entry, i (i)}
 					<li class={`tl-${entry.kind}`}>
-						<span class="t">{(entry.tMs / 1000).toFixed(1)}s</span>
+						<span class="t">{(Math.max(0, entry.tMs - result.startTimeMs) / 1000).toFixed(1)}s</span
+						>
 						{#if entry.kind === 'action'}
 							<span class={entry.correct ? 'ok' : 'bad'}
 								>{$_(entry.correct ? 'timeline.correct' : 'timeline.incorrect')}</span

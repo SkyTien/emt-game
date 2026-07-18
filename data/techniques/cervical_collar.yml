@@ -5,7 +5,7 @@ title:
 description:
   zh-Hant: 為疑似頸椎傷患套上頸圈,避免次發性脊髓損傷
 body_region: neck
-illustration: /illustrations/scenes/cervical_collar.png
+illustration: /illustrations/scenes/cervical_collar.svg
 steps:
   - id: ppe
     action_id: wear_ppe

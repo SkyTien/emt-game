@@ -29,6 +29,45 @@ export function evaluateCondition(expr: string, ctx: ConditionContext): boolean 
 	return parser.parseExpr();
 }
 
+export function validateConditionExpression(expr: string): boolean {
+	const tokens = tokenize(expr.trim());
+	if (tokens.length === 0) return false;
+	let pos = 0;
+	const atom = (): boolean => {
+		const token = tokens[pos];
+		if (!token) return false;
+		if (token.kind === 'lparen') {
+			pos += 1;
+			if (!expression() || tokens[pos]?.kind !== 'rparen') return false;
+			pos += 1;
+			return true;
+		}
+		if (token.kind !== 'atom') return false;
+		pos += 1;
+		if (token.value.startsWith('正確率') || token.value.startsWith('惡化等級')) {
+			return COMPARISON_RE.test(token.value);
+		}
+		return token.value.length > 0;
+	};
+	const term = (): boolean => {
+		if (!atom()) return false;
+		while (tokens[pos]?.kind === 'and') {
+			pos += 1;
+			if (!atom()) return false;
+		}
+		return true;
+	};
+	const expression = (): boolean => {
+		if (!term()) return false;
+		while (tokens[pos]?.kind === 'or') {
+			pos += 1;
+			if (!term()) return false;
+		}
+		return true;
+	};
+	return expression() && pos === tokens.length;
+}
+
 type Token = { kind: 'or' | 'and' | 'lparen' | 'rparen' | 'atom'; value: string };
 
 function tokenize(input: string): Token[] {

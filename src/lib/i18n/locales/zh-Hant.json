@@ -94,6 +94,7 @@
 		"errors": "錯誤",
 		"worsen_level": "惡化等級",
 		"timeline_entry": "查看時間軸回顧",
+		"unavailable": "找不到這次的結算資料，可能已過期或資料不完整。",
 		"return_menu": "返回選關"
 	},
 	"timeline": {

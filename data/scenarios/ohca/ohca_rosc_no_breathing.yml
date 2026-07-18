@@ -47,18 +47,18 @@ outcomes:
       zh-Hant: ROSC — 恢復循環、持續輔助通氣送醫
     text:
       zh-Hant: 高品質 CPR 與電擊後病人恢復自主循環，持續 BVM 輔助通氣維持氧合，送醫後由急診接手進一步處置。
-    illustration: /illustrations/outcomes/rosc.png
+    illustration: /illustrations/outcomes/placeholder.svg
   - id: rosc_poor
     when: 已電擊
     title:
       zh-Hant: ROSC 但處置細節待加強
     text:
       zh-Hant: 病人雖恢復循環，但部分流程有延誤。請回顧時間軸找出可以改進的環節。
-    illustration: /illustrations/outcomes/cpr.png
+    illustration: /illustrations/outcomes/placeholder.svg
   - id: doa
     when: 預設
     title:
       zh-Hant: 到院前 DOA
     text:
       zh-Hant: 多項關鍵動作延誤，病人到院前無生命徵象。請檢視時間軸看哪些步驟可以更快。
-    illustration: /illustrations/outcomes/doa.png
+    illustration: /illustrations/outcomes/placeholder.svg

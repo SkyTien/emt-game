@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
-	import * as Icons from 'lucide-svelte';
+	import { CircleCheck, CircleX, ChevronLeft, Lightbulb, TriangleAlert } from 'lucide-svelte';
 	import { getTechniqueById, getRegistry } from '$lib/data/content';
 	import { localize } from '$lib/i18n/localize';
 	import { TechniqueEngine, type TechniqueState } from '$lib/engine/technique-engine';
@@ -81,7 +81,7 @@
 	<div class="layout-container">
 		<header class="topbar">
 			<a class="back" href={`${base}/techniques`} aria-label="Back">
-				<Icons.ChevronLeft />
+				<ChevronLeft />
 			</a>
 			<div class="title-info">
 				<span class="title">{localize(technique.title, $locale ?? 'zh-Hant')}</span>
@@ -92,7 +92,7 @@
 				>
 			</div>
 			<div class="wrong-counter">
-				<Icons.AlertTriangle size={16} />
+				<TriangleAlert size={16} />
 				<span>{totalWrong}</span>
 			</div>
 		</header>
@@ -117,9 +117,9 @@
 					>
 						<div class="feedback-icon">
 							{#if lastFeedback.correct}
-								<Icons.CheckCircle2 size={24} />
+								<CircleCheck size={24} />
 							{:else}
-								<Icons.XCircle size={24} />
+								<CircleX size={24} />
 							{/if}
 						</div>
 						<div class="feedback-text">
@@ -134,7 +134,7 @@
 				{#if wrongOnCurrent >= 2 && lastTip}
 					<div class="hint-box" transition:fade>
 						<div class="hint-header">
-							<Icons.Lightbulb size={16} />
+							<Lightbulb size={16} />
 							<span>{$_('technique.tip_label')}</span>
 						</div>
 						<p>{localize(lastTip, $locale ?? 'zh-Hant')}</p>
@@ -167,7 +167,14 @@
 
 					<div class="toolbox-wrapper">
 						<h3 class="sec-title">{$_('technique.use_tool')}</h3>
-						<Toolbox {registry} bagLocations={allBagsOnScene} partnerActions={[]} onpick={onPick} />
+						<Toolbox
+							{registry}
+							bagLocations={allBagsOnScene}
+							partnerActions={[]}
+							showHand
+							showDirective={false}
+							onpick={onPick}
+						/>
 					</div>
 				</section>
 			</div>

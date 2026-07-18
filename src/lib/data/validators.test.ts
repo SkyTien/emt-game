@@ -202,6 +202,38 @@ describe('validateScenario', () => {
 		expect(r.ok).toBe(false);
 		expect(r.errors.some((e) => e.code === 'empty_id')).toBe(true);
 	});
+
+	it('rejects duplicate required actions and prerequisite cycles', () => {
+		const duplicate = structuredClone(goodScenario);
+		duplicate.phases[0].required = [
+			{ action_id: 'check_scene_safe' },
+			{ action_id: 'check_scene_safe' }
+		];
+		expect(
+			validateScenario(duplicate, reg).errors.some((e) => e.code === 'duplicate_required_action')
+		).toBe(true);
+
+		const cycle = structuredClone(goodScenario);
+		cycle.phases[1].required = [
+			{ action_id: 'cpr_compress', after: 'apply_aed' },
+			{ action_id: 'apply_aed', after: 'cpr_compress' }
+		];
+		expect(validateScenario(cycle, reg).errors.some((e) => e.code === 'after_cycle')).toBe(true);
+	});
+
+	it('rejects malformed conditions and a default outcome that is not last', () => {
+		const malformed = structuredClone(goodScenario);
+		malformed.outcomes[0].when = '正確率>=0.9 trailing';
+		expect(
+			validateScenario(malformed, reg).errors.some((e) => e.code === 'invalid_condition')
+		).toBe(true);
+
+		const shadowed = structuredClone(goodScenario);
+		shadowed.outcomes.reverse();
+		expect(
+			validateScenario(shadowed, reg).errors.some((e) => e.code === 'default_outcome_not_last')
+		).toBe(true);
+	});
 });
 
 describe('validateTechnique', () => {

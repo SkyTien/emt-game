@@ -6,7 +6,15 @@
 
 ## [Unreleased]
 
-待發布的變更將在此記錄。
+### Fixed
+
+- Scenario sessions now start phase timers only when interaction opens, finalize once, save role-specific progress, and restore result/timeline data safely.
+- Action IDs are canonical across engines and UI; repeated actions are inert, wrong-order attempts are logged, and authored vital reveal metadata controls patient assessment.
+- Content validation now rejects invalid schemas, roles, references, prerequisite/inheritance cycles, malformed outcome conditions, misplaced defaults, and missing local assets.
+- Technique and deterministic OHCA Playwright flows cover completion, persistence, result rendering, and refresh idempotence.
+- GitHub Pages builds use base-aware navigation/assets and a `404.html` SPA fallback for dynamic-route reloads.
+- Lucide icons now use a curated named-import registry, removing the oversized shared bundle while preserving content-authored icon names.
+- Remaining Phase 2 follow-up is limited to replacing placeholder illustrations and broader clinical review.
 
 ---
 

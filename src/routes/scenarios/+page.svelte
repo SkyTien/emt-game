@@ -45,7 +45,12 @@
 			{#each scenarios as s (s.id)}
 				{@const stars = bestForScenario(s.id)}
 				<li>
-					<a class="row" href={s.player_role === 'either' ? `${base}/scenarios/${s.id}/role` : `${base}/scenarios/${s.id}/play`}>
+					<a
+						class="row"
+						href={s.player_role === 'either'
+							? `${base}/scenarios/${s.id}/role`
+							: `${base}/scenarios/${s.id}/play`}
+					>
 						<span class="title">{localize(s.title, $locale ?? 'zh-Hant')}</span>
 						<span class="stars">
 							{#if stars > 0}

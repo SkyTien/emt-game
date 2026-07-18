@@ -12,7 +12,9 @@
 		partnerActions,
 		completedIds,
 		onpick,
-		ondirective
+		ondirective,
+		showHand = false,
+		showDirective = true
 	}: {
 		registry: { byBag: (b: BagId) => Action[] };
 		bagLocations: Record<BagId, Location>;
@@ -20,11 +22,11 @@
 		completedIds?: Set<string>;
 		onpick?: (a: Action) => void;
 		ondirective?: (a: Action) => void;
+		showHand?: boolean;
+		showDirective?: boolean;
 	} = $props();
 
-	// Toolbox is specifically for physical equipment, so we exclude the 'hand' (徒手) actions
-	// because they are now covered in the Assessment mode.
-	const TOOLBOX_BAGS = BAG_IDS.filter((b) => b !== 'hand');
+	const TOOLBOX_BAGS = $derived(BAG_IDS.filter((bag) => showHand || bag !== 'hand'));
 
 	const BAG_ICONS: Record<BagId | 'directive', string> = {
 		hand: 'Hand',
@@ -35,7 +37,7 @@
 		directive: 'UserPlus'
 	};
 
-	let activeBag = $state<BagId | 'directive'>(TOOLBOX_BAGS[0]);
+	let activeBag = $state<BagId | 'directive'>('o2kit');
 	let activeActions = $derived(activeBag === 'directive' ? [] : registry.byBag(activeBag as BagId));
 	let activeBagOnScene = $derived(
 		activeBag === 'directive' ? true : bagLocations[activeBag as BagId] === 'on_scene'
@@ -57,17 +59,17 @@
 				<span>{$_(`equipment.${bag}`)}</span>
 			</button>
 		{/each}
-		<button
-			type="button"
-			role="tab"
-			aria-selected={activeBag === 'directive'}
-			class="tab"
-			class:active={activeBag === 'directive'}
-			onclick={() => (activeBag = 'directive')}
-		>
-			<Icon name={BAG_ICONS.directive} size={16} />
-			<span>{$_('scenario.toolbox_directive_partner')}</span>
-		</button>
+		{#if showDirective}<button
+				type="button"
+				role="tab"
+				aria-selected={activeBag === 'directive'}
+				class="tab"
+				class:active={activeBag === 'directive'}
+				onclick={() => (activeBag = 'directive')}
+			>
+				<Icon name={BAG_ICONS.directive} size={16} />
+				<span>{$_('scenario.toolbox_directive_partner')}</span>
+			</button>{/if}
 	</div>
 
 	<div class="panel">

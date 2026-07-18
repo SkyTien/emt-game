@@ -1,6 +1,7 @@
 import type { Action, BagId, LocalizedString, Scenario, Technique } from '$lib/types/content';
 import { BAG_IDS } from '$lib/types/content';
 import { ActionRegistry } from './registry';
+import { validateConditionExpression } from '$lib/engine/condition';
 
 export type ValidationError = {
 	field: string;
@@ -22,6 +23,47 @@ export type ValidationResult = {
 };
 
 const FALLBACK_LOCALE = 'zh-Hant';
+const ROLES = ['lead', 'assist', 'either'] as const;
+const BODY_REGIONS = [
+	'head',
+	'neck',
+	'chest',
+	'wrist',
+	'abdomen',
+	'leg',
+	'arm',
+	'general'
+] as const;
+const VITAL_KEYS = ['consciousness', 'breath', 'pulse', 'skin', 'glucose', 'spO2', 'bp'] as const;
+
+function ensureEnum(
+	value: unknown,
+	values: readonly string[],
+	field: string,
+	code: string,
+	errors: ValidationError[]
+): void {
+	if (!values.includes(value as string)) {
+		pushError(
+			errors,
+			field,
+			code,
+			`${field}: 值「${String(value)}」不合法，合法值為 ${values.join(' / ')}`,
+			value
+		);
+	}
+}
+
+function ensureSchemaVersion(value: unknown, field: string, errors: ValidationError[]): void {
+	if (value !== 1)
+		pushError(
+			errors,
+			field,
+			'invalid_schema_version',
+			`${field}: 目前只支援 schema_version: 1`,
+			value
+		);
+}
 
 function pushError(
 	out: ValidationError[],
@@ -141,6 +183,23 @@ export function validateActions(input: unknown): ValidationResult {
 			seenLabels.add(zh);
 		}
 		ensureBag(a.bag, `${path}.bag`, errors);
+		if (a.default_role !== undefined)
+			ensureEnum(a.default_role, ROLES, `${path}.default_role`, 'invalid_role', errors);
+		if (a.body_region !== undefined)
+			ensureEnum(a.body_region, BODY_REGIONS, `${path}.body_region`, 'invalid_body_region', errors);
+		if (a.reveals !== undefined) {
+			if (!Array.isArray(a.reveals))
+				pushError(
+					errors,
+					`${path}.reveals`,
+					'invalid_type',
+					`${path}.reveals: 必須為生命徵象欄位陣列`
+				);
+			else
+				a.reveals.forEach((key, i) =>
+					ensureEnum(key, VITAL_KEYS, `${path}.reveals[${i}]`, 'invalid_vital_key', errors)
+				);
+		}
 		if (a.icon !== undefined && typeof a.icon !== 'string') {
 			pushError(errors, `${path}.icon`, 'invalid_type', `${path}.icon: 必須為字串路徑`);
 		}
@@ -165,9 +224,14 @@ function validateRequiredEntries(
 	}
 	const allActionIds = new Set(
 		requiredRaw
-			.filter((e) => typeof e === 'object' && e && typeof (e as { action_id?: unknown }).action_id === 'string')
+			.filter(
+				(e) =>
+					typeof e === 'object' && e && typeof (e as { action_id?: unknown }).action_id === 'string'
+			)
 			.map((e) => (e as { action_id: string }).action_id)
 	);
+	const seenActionIds = new Set<string>();
+	const afterByAction = new Map<string, string>();
 	requiredRaw.forEach((entry, i) => {
 		const subField = `${field}[${i}]`;
 
@@ -176,11 +240,22 @@ function validateRequiredEntries(
 			return;
 		}
 
-		const obj = entry as { action_id?: unknown; after?: unknown };
+		const obj = entry as { action_id?: unknown; after?: unknown; by?: unknown };
 		if (typeof obj.action_id !== 'string' || obj.action_id.length === 0) {
 			pushError(errors, subField, 'invalid_type', `${subField}: 必須含非空 action_id`);
 			return;
 		}
+		if (seenActionIds.has(obj.action_id))
+			pushError(
+				errors,
+				`${subField}.action_id`,
+				'duplicate_required_action',
+				`${subField}.action_id: required 動作「${obj.action_id}」重複`,
+				obj.action_id
+			);
+		seenActionIds.add(obj.action_id);
+		if (obj.by !== undefined)
+			ensureEnum(obj.by, ['lead', 'assist'], `${subField}.by`, 'invalid_role', errors);
 
 		// Verify action exists
 		try {
@@ -215,9 +290,21 @@ function validateRequiredEntries(
 					`${subField}.after: 不能指向自己`,
 					obj.after
 				);
-			}
+			} else afterByAction.set(obj.action_id, obj.after);
 		}
 	});
+	for (const start of afterByAction.keys()) {
+		const visited = new Set<string>();
+		let current: string | undefined = start;
+		while (current) {
+			if (visited.has(current)) {
+				pushError(errors, field, 'after_cycle', `${field}: 動作前置條件形成循環`, start);
+				break;
+			}
+			visited.add(current);
+			current = afterByAction.get(current);
+		}
+	}
 }
 
 export function validateScenario(input: unknown, registry: ActionRegistry): ValidationResult {
@@ -230,8 +317,18 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 	}
 	const s = input as Partial<Scenario>;
 
+	ensureSchemaVersion(s.schema_version, 'scenario.schema_version', errors);
 	ensureNonEmptyString(s.id, 'scenario.id', errors);
 	ensureLocalized(s.title, 'scenario.title', errors, warnings);
+	ensureEnum(s.player_role, ROLES, 'scenario.player_role', 'invalid_role', errors);
+	if (s.patient_initial && typeof s.patient_initial === 'object') {
+		for (const key of VITAL_KEYS) {
+			const value = s.patient_initial[key];
+			if (value !== undefined || key === 'consciousness' || key === 'breath' || key === 'pulse') {
+				ensureLocalized(value, `scenario.patient_initial.${key}`, errors, warnings);
+			}
+		}
+	} else pushError(errors, 'scenario.patient_initial', 'missing', 'scenario.patient_initial: 缺少');
 
 	if (s.crew && typeof s.crew === 'object') {
 		for (const role of ['lead', 'assist'] as const) {
@@ -240,6 +337,7 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 				pushError(errors, `scenario.crew.${role}`, 'missing', `scenario.crew.${role}: 缺少`);
 				continue;
 			}
+			ensureEnum(member.role, ROLES, `scenario.crew.${role}.role`, 'invalid_role', errors);
 			if (Array.isArray(member.carries)) {
 				member.carries.forEach((bag, idx) => {
 					ensureBag(bag, `scenario.crew.${role}.carries[${idx}]`, errors);
@@ -309,7 +407,7 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 		);
 	} else if (Array.isArray(s.outcomes)) {
 		const outcomeIds = new Set<string>();
-		let hasDefault = false;
+		let defaultCount = 0;
 		s.outcomes.forEach((o, i) => {
 			const path = `scenario.outcomes[${i}]`;
 			const id = ensureNonEmptyString(o.id, `${path}.id`, errors);
@@ -322,7 +420,15 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 			if (typeof o.when !== 'string' || o.when.length === 0) {
 				pushError(errors, `${path}.when`, 'empty_when', `${path}.when: 必須為非空字串`);
 			} else {
-				if (o.when.trim() === '預設') hasDefault = true;
+				if (o.when.trim() === '預設') defaultCount += 1;
+				else if (!validateConditionExpression(o.when))
+					pushError(
+						errors,
+						`${path}.when`,
+						'invalid_condition',
+						`${path}.when: 條件語法無效`,
+						o.when
+					);
 				for (const flag of extractFlagTokens(o.when)) {
 					if (!declaredFlags.has(flag)) {
 						pushError(
@@ -338,7 +444,7 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 			ensureLocalized(o.title, `${path}.title`, errors, warnings);
 			ensureLocalized(o.text, `${path}.text`, errors, warnings);
 		});
-		if (!hasDefault) {
+		if (defaultCount === 0) {
 			pushError(
 				errors,
 				'scenario.outcomes',
@@ -346,6 +452,20 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 				'scenario.outcomes: 必須有一個 when="預設" 的兜底結局'
 			);
 		}
+		if (defaultCount > 1)
+			pushError(
+				errors,
+				'scenario.outcomes',
+				'duplicate_default_outcome',
+				'scenario.outcomes: 只能有一個 when="預設" 的兜底結局'
+			);
+		if (defaultCount === 1 && s.outcomes.at(-1)?.when.trim() !== '預設')
+			pushError(
+				errors,
+				'scenario.outcomes',
+				'default_outcome_not_last',
+				'scenario.outcomes: when="預設" 的兜底結局必須放在最後'
+			);
 	}
 
 	return { ok: errors.length === 0, errors, warnings };
@@ -424,9 +544,12 @@ export function validateTechnique(input: unknown, registry: ActionRegistry): Val
 	}
 	const t = input as Partial<Technique>;
 
+	ensureSchemaVersion(t.schema_version, 'technique.schema_version', errors);
 	ensureNonEmptyString(t.id, 'technique.id', errors);
 	ensureLocalized(t.title, 'technique.title', errors, warnings);
 	ensureLocalized(t.description, 'technique.description', errors, warnings);
+	if (t.body_region !== undefined)
+		ensureEnum(t.body_region, BODY_REGIONS, 'technique.body_region', 'invalid_body_region', errors);
 
 	if (!Array.isArray(t.steps) || t.steps.length === 0) {
 		pushError(errors, 'technique.steps', 'empty_steps', 'technique.steps: 不可為空陣列');

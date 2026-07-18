@@ -41,6 +41,7 @@ export type ScenarioState = {
 	startTimeMs: number;
 	phaseIndex: number;
 	phaseStartTimeMs: number;
+	phaseStarted: boolean;
 	completedRequiredIds: Set<string>;
 	correctActions: number;
 	wrongActions: number;
@@ -77,6 +78,7 @@ export const ScenarioEngine = {
 			startTimeMs: nowMs,
 			phaseIndex: 0,
 			phaseStartTimeMs: nowMs,
+			phaseStarted: false,
 			completedRequiredIds: new Set(),
 			correctActions: 0,
 			wrongActions: 0,
@@ -95,6 +97,12 @@ export const ScenarioEngine = {
 		return state.scenario.phases[state.phaseIndex] ?? null;
 	},
 
+	startPhase(state: ScenarioState, nowMs: number): ScenarioState {
+		if (state.finalOutcomeId || state.phaseStarted || !ScenarioEngine.currentPhase(state))
+			return state;
+		return { ...state, phaseStarted: true, phaseStartTimeMs: nowMs };
+	},
+
 	performAction(
 		state: ScenarioState,
 		actionIdOrLabel: string,
@@ -110,8 +118,9 @@ export const ScenarioEngine = {
 		// Verify action exists
 		const registry = getRegistry();
 		const actionId = actionIdOrLabel;
+		let action;
 		try {
-			registry.byId(actionId);
+			action = registry.byId(actionId);
 		} catch {
 			// Unknown action; treat as incorrect and count as wrong
 			const next: ScenarioState = {
@@ -135,17 +144,40 @@ export const ScenarioEngine = {
 			return { state: next, feedback: { correct: false, message: 'unknown_action' } };
 		}
 
+		if (!actorCanAccessBag(state, action.bag, by)) {
+			return { state, feedback: { correct: false, message: 'equipment_unavailable' } };
+		}
+
 		// Find matching required entry by ID
 		const required = phase.required.find((r) => r.action_id === actionId);
+		if (required && state.completedRequiredIds.has(actionId)) {
+			return { state, feedback: { correct: false, message: 'already_completed' } };
+		}
 		const prerequisiteMet = !required?.after || state.completedRequiredIds.has(required.after);
-		const isCorrect =
-			Boolean(required) &&
-			roleMatches(required?.by, by) &&
-			prerequisiteMet;
+		const isCorrect = Boolean(required) && roleMatches(required?.by, by) && prerequisiteMet;
 
 		if (required && !prerequisiteMet) {
+			const action = registry.byId(actionId);
+			const next: ScenarioState = {
+				...state,
+				wrongActions: state.wrongActions + 1,
+				consecutiveMistakes: state.consecutiveMistakes + 1,
+				completedRequiredIds: new Set(state.completedRequiredIds),
+				flags: new Set(state.flags),
+				log: [
+					...state.log,
+					{
+						kind: 'action' as const,
+						tMs: nowMs,
+						actionId,
+						actionLabel: action.label['zh-Hant'],
+						by,
+						correct: false
+					}
+				]
+			};
 			return {
-				state,
+				state: next,
 				feedback: { correct: false, message: 'wrong_order' }
 			};
 		}
@@ -163,23 +195,8 @@ export const ScenarioEngine = {
 			next.consecutiveMistakes = 0;
 			if (required?.set_flag) next.flags.add(required.set_flag);
 
-			// Reveal Vitals Logic - use action label for text-based matching
 			const action = registry.byId(actionId);
-			const label = action.label['zh-Hant'];
-			if (label.includes('評估意識') || label.includes('AVPU'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'consciousness'])];
-			if (label.includes('呼吸'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'breath'])];
-			if (label.includes('脈搏'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'pulse'])];
-			if (label.includes('皮膚'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'skin'])];
-			if (label.includes('血糖'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'glucose'])];
-			if (label.includes('血氧'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'spO2'])];
-			if (label.includes('血壓'))
-				next.revealedVitals = [...new Set([...next.revealedVitals, 'bp'])];
+			next.revealedVitals = [...new Set([...next.revealedVitals, ...(action.reveals ?? [])])];
 		} else {
 			next.wrongActions += 1;
 			next.consecutiveMistakes += 1;
@@ -204,6 +221,7 @@ export const ScenarioEngine = {
 
 	tick(state: ScenarioState, nowMs: number): ScenarioState {
 		if (state.finalOutcomeId) return state;
+		if (!state.phaseStarted) return state;
 		const phase = ScenarioEngine.currentPhase(state);
 		if (!phase) return state;
 		if (typeof phase.timeout !== 'number') return state;
@@ -241,13 +259,22 @@ export const ScenarioEngine = {
 		return maybeFinalize(next, nowMs);
 	},
 
+	getStars(scenario: Scenario, outcomeId: string): number {
+		const index = scenario.outcomes.findIndex((outcome) => outcome.id === outcomeId);
+		if (index < 0) return 0;
+		if (scenario.outcomes.length === 1 || index === 0) return 3;
+		if (index === scenario.outcomes.length - 1) return 1;
+		return 2;
+	},
+
 	directivePartner(
 		state: ScenarioState,
-		actionLabel: string,
+		actionId: string,
 		nowMs = state.phaseStartTimeMs
 	): { state: ScenarioState; feedback: Feedback; event: DirectiveEvent } {
-		const result = ScenarioEngine.performAction(state, actionLabel, 'assist', nowMs);
-		return { ...result, event: { tMs: nowMs, actionId: actionLabel } };
+		const partnerRole: ActorRole = state.playerRole === 'lead' ? 'assist' : 'lead';
+		const result = ScenarioEngine.performAction(state, actionId, partnerRole, nowMs);
+		return { ...result, event: { tMs: nowMs, actionId } };
 	},
 
 	getOutcome(state: ScenarioState): Outcome | null {
@@ -268,20 +295,20 @@ export const ScenarioEngine = {
 	}
 };
 
-function roleMatches(
-	required: 'lead' | 'assist' | undefined,
-	actual: ActorRole
-): boolean {
+function roleMatches(required: 'lead' | 'assist' | undefined, actual: ActorRole): boolean {
 	if (!required) return true;
 	return actual === required;
 }
 
+function actorCanAccessBag(state: ScenarioState, bag: BagId, actor: ActorRole): boolean {
+	if (bag === 'hand' || bag === 'vehicle') return true;
+	const location = state.bagLocations[bag];
+	if (actor === state.playerRole) return location === 'on_scene';
+	return location === 'on_scene' || location === 'on_partner';
+}
+
 function clonePatient(p: PatientVitals): PatientVitals {
-	return {
-		consciousness: { ...p.consciousness },
-		breath: { ...p.breath },
-		pulse: { ...p.pulse }
-	};
+	return structuredClone(p);
 }
 
 function degradePatient(p: PatientVitals, worsen: number): void {
@@ -303,6 +330,7 @@ function maybeAdvancePhase(state: ScenarioState, nowMs: number): ScenarioState {
 		...state,
 		phaseIndex: state.phaseIndex + 1,
 		phaseStartTimeMs: nowMs,
+		phaseStarted: false,
 		completedRequiredIds: new Set(),
 		consecutiveMistakes: 0,
 		log: [...state.log]

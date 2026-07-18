@@ -26,6 +26,7 @@ export type Action = {
 	body_region?: BodyRegion;
 	icon?: string;
 	explain?: LocalizedString;
+	reveals?: (keyof PatientVitals)[];
 };
 
 export type ActionCategory = {

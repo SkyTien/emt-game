@@ -38,6 +38,7 @@ actions:
     default_role: lead
     body_region: head
     icon: ScanFace
+    reveals: [consciousness]
     explain:
       zh-Hant: A 警覺 / V 對聲音反應 / P 對痛刺激反應 / U 無反應
 
@@ -47,6 +48,7 @@ actions:
     default_role: lead
     body_region: chest
     icon: Wind
+    reveals: [breath]
     explain:
       zh-Hant: 5~10 秒內判斷有無正常呼吸,異常呼吸視同無呼吸
 
@@ -56,6 +58,7 @@ actions:
     default_role: lead
     body_region: neck
     icon: Activity
+    reveals: [pulse]
     explain:
       zh-Hant: 同步看呼吸測脈搏,5~10 秒內完成
 
@@ -72,6 +75,7 @@ actions:
     bag: hand
     body_region: general
     icon: Thermometer
+    reveals: [skin]
     explain:
       zh-Hant: 評估微循環:檢查體溫（濕冷/溫暖）、色澤（蒼白/發紺/紅潤）
 
@@ -96,6 +100,7 @@ actions:
     bag: jumpkit
     body_region: wrist
     icon: Activity
+    reveals: [spO2]
     explain:
       zh-Hant: 測量血氧飽和度 (SpO2),確認有無缺氧
 
@@ -104,6 +109,7 @@ actions:
     bag: jumpkit
     body_region: arm
     icon: Gauge
+    reveals: [bp]
     explain:
       zh-Hant: 測量收縮壓與舒張壓以評估血循狀態
 
@@ -136,6 +142,7 @@ actions:
     bag: hand
     body_region: wrist
     icon: Activity
+    reveals: [pulse]
 
   - id: ask_chief_complaint
     label: { zh-Hant: 詢問主訴 }
@@ -373,6 +380,7 @@ actions:
     default_role: lead
     body_region: wrist
     icon: Droplet
+    reveals: [glucose]
     explain:
       zh-Hant: 意識改變病人應 routine 量血糖,小於 60 mg/dL 即視為低血糖
 

@@ -38,7 +38,7 @@ test('設定頁清除進度 → 首頁進度歸零', async ({ page }) => {
 
 	// 二次確認對話框
 	await expect(page.getByText(/確認清除進度/)).toBeVisible();
-	await page.getByRole('button', { name: '確認' }).click();
+	await page.getByRole('dialog').getByRole('button', { name: '清除全部進度' }).click();
 
 	// 確認 localStorage 已清除
 	const stored = await page.evaluate(() => localStorage.getItem('emt1game:progress'));

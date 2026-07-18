@@ -10,10 +10,21 @@
 	const technique = getTechniqueById(page.params.id ?? '');
 	type LastResult = { stars: number; totalWrong: number };
 	let result: LastResult | null = $state(null);
+	let loaded = $state(false);
 
 	onMount(() => {
-		const raw = sessionStorage.getItem(`emt1game:lastTechniqueResult:${page.params.id}`);
-		if (raw) result = JSON.parse(raw) as LastResult;
+		try {
+			const raw = sessionStorage.getItem(`emt1game:lastTechniqueResult:${page.params.id}`);
+			if (!raw) return;
+			const parsed = JSON.parse(raw) as Partial<LastResult>;
+			if (typeof parsed.stars === 'number' && typeof parsed.totalWrong === 'number') {
+				result = parsed as LastResult;
+			}
+		} catch {
+			result = null;
+		} finally {
+			loaded = true;
+		}
 	});
 </script>
 
@@ -23,8 +34,11 @@
 		<h1>{$_('result.technique_title')}</h1>
 	</header>
 
-	{#if !technique || !result}
+	{#if !loaded}
 		<p>{$_('common.loading')}</p>
+	{:else if !technique || !result}
+		<p>{$_('result.unavailable')}</p>
+		<a class="btn ghost" href={`${base}/techniques`}>{$_('result.return_menu')}</a>
 	{:else}
 		<h2>{localize(technique.title, $locale ?? 'zh-Hant')}</h2>
 		<dl class="metrics">

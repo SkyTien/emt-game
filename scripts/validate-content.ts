@@ -2,8 +2,8 @@
 /**
  * 掃描 data/**\/*.yml,跑驗證,失敗時 exit code 1。
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { ActionRegistry } from '../src/lib/data/registry';
 import {
@@ -15,6 +15,7 @@ import {
 import type { Action, Scenario } from '../src/lib/types/content';
 
 const DATA_DIR = new URL('../data/', import.meta.url).pathname;
+const STATIC_DIR = new URL('../static/', import.meta.url).pathname;
 
 type FoundFile = { path: string; rel: string };
 
@@ -97,17 +98,34 @@ for (const f of scenarioFiles) {
 	if (parsed?.id) scenarioRawMap.set(parsed.id, parsed);
 }
 
-function resolveScenarioForValidation(raw: Scenario, map: Map<string, Scenario>): Scenario {
+function resolveScenarioForValidation(
+	raw: Scenario,
+	map: Map<string, Scenario>,
+	chain = new Set<string>()
+): Scenario {
 	if (!raw.extends) return raw;
+	if (chain.has(raw.id)) throw new Error(`inheritance cycle: ${[...chain, raw.id].join(' -> ')}`);
 	const parent = map.get(raw.extends);
-	if (!parent) return raw;
-	const resolvedParent = resolveScenarioForValidation(parent, map);
+	if (!parent) throw new Error(`missing parent scenario: ${raw.extends}`);
+	const nextChain = new Set(chain).add(raw.id);
+	const resolvedParent = resolveScenarioForValidation(parent, map, nextChain);
 	return {
 		...resolvedParent,
 		...raw,
 		phases: [...resolvedParent.phases, ...(raw.phases ?? [])],
 		extends: undefined
 	};
+}
+
+function validateLocalAsset(label: string, field: string, value: unknown): boolean {
+	if (typeof value !== 'string' || value.length === 0 || /^https?:\/\//.test(value)) return true;
+	const relative = value.replace(/^\//, '');
+	const full = resolve(STATIC_DIR, relative);
+	if (!full.startsWith(resolve(STATIC_DIR) + '/') || !existsSync(full)) {
+		console.error(`  fail  ${label}  ${field}  local asset not found: ${value}`);
+		return false;
+	}
+	return true;
 }
 
 console.log('\n# Scenarios');
@@ -118,9 +136,25 @@ for (const f of scenarioFiles) {
 		allOk = false;
 		continue;
 	}
-	const resolved = resolveScenarioForValidation(raw, scenarioRawMap);
+	let resolved: Scenario;
+	try {
+		resolved = resolveScenarioForValidation(raw, scenarioRawMap);
+	} catch (error) {
+		console.error(`  fail  ${f.rel}  scenario.extends  ${(error as Error).message}`);
+		allOk = false;
+		continue;
+	}
 	const result = validateScenario(resolved, registry);
 	if (!reportResult(f.rel, result)) allOk = false;
+	if (!validateLocalAsset(f.rel, 'scenario.illustration', resolved.illustration)) allOk = false;
+	(resolved.phases ?? []).forEach((phase, i) => {
+		if (!validateLocalAsset(f.rel, `scenario.phases[${i}].illustration`, phase.illustration))
+			allOk = false;
+	});
+	(resolved.outcomes ?? []).forEach((outcome, i) => {
+		if (!validateLocalAsset(f.rel, `scenario.outcomes[${i}].illustration`, outcome.illustration))
+			allOk = false;
+	});
 }
 
 console.log('\n# Techniques');
@@ -133,6 +167,16 @@ for (const f of techniqueFiles) {
 	}
 	const result = validateTechnique(parsed, registry);
 	if (!reportResult(f.rel, result)) allOk = false;
+	if (
+		parsed &&
+		typeof parsed === 'object' &&
+		!validateLocalAsset(
+			f.rel,
+			'technique.illustration',
+			(parsed as { illustration?: unknown }).illustration
+		)
+	)
+		allOk = false;
 }
 
 if (allOk) {

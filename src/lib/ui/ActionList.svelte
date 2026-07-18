@@ -59,12 +59,12 @@
 	}
 
 	function hasDone(zone: ZoneId): boolean {
-		return actionsForZone(zone).some((a) => completedIds.has(a.label['zh-Hant']));
+		return actionsForZone(zone).some((a) => completedIds.has(a.id));
 	}
 
 	function allDone(zone: ZoneId): boolean {
 		const zoneActions = actionsForZone(zone);
-		return zoneActions.length > 0 && zoneActions.every((a) => completedIds.has(a.label['zh-Hant']));
+		return zoneActions.length > 0 && zoneActions.every((a) => completedIds.has(a.id));
 	}
 
 	function toggle(zone: ZoneId) {
@@ -106,6 +106,7 @@
 						class:partial={hasDone('head') && !allDone('head')}
 						style="--c: {ZONES.head.color}"
 						role="button"
+						aria-label={ZONES.head.label}
 						tabindex="0"
 						onclick={() => toggle('head')}
 						onkeydown={(e) => handleZoneKeydown(e, 'head')}
@@ -123,6 +124,7 @@
 						class:partial={hasDone('neck') && !allDone('neck')}
 						style="--c: {ZONES.neck.color}"
 						role="button"
+						aria-label={ZONES.neck.label}
 						tabindex="0"
 						onclick={() => toggle('neck')}
 						onkeydown={(e) => handleZoneKeydown(e, 'neck')}
@@ -140,6 +142,7 @@
 						class:partial={hasDone('chest') && !allDone('chest')}
 						style="--c: {ZONES.chest.color}"
 						role="button"
+						aria-label={ZONES.chest.label}
 						tabindex="0"
 						onclick={() => toggle('chest')}
 						onkeydown={(e) => handleZoneKeydown(e, 'chest')}

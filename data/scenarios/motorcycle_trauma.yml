@@ -182,18 +182,18 @@ outcomes:
       zh-Hant: 病人到院時生命徵象穩定
     text:
       zh-Hant: 完整的脊椎固定與及時止血，病人送達外傷中心時意識清晰、循環穩定。
-    illustration: /illustrations/outcomes/stable.png
+    illustration: /illustrations/outcomes/placeholder.svg
   - id: hemorrhagic_shock
     when: 惡化等級>=2
     title:
       zh-Hant: 到院時出血性休克
     text:
       zh-Hant: 多項延誤導致病人到院時呈現休克。請回看時間軸找出可以更快處理的環節。
-    illustration: /illustrations/outcomes/shock.png
+    illustration: /illustrations/outcomes/placeholder.svg
   - id: bad_handoff
     when: 預設
     title:
       zh-Hant: 到院後仍需密切觀察
     text:
       zh-Hant: 雖然到院但流程不夠完整。請再來一次精進。
-    illustration: /illustrations/outcomes/handoff.png
+    illustration: /illustrations/outcomes/placeholder.svg

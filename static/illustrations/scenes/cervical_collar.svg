@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">上頸圈單項插畫預留圖</title>
+  <desc id="desc">正式操作插畫完成前使用的本地預留圖</desc>
+  <rect width="1200" height="675" fill="#10263a"/>
+  <circle cx="600" cy="220" r="105" fill="#d7e3ee"/>
+  <path d="M505 325h190l45 190H460z" fill="#486b88"/>
+  <path d="M510 300q90 55 180 0v95q-90 45-180 0z" fill="#fbd38d" opacity=".9"/>
+  <text x="600" y="590" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="38">上頸圈操作</text>
+</svg>

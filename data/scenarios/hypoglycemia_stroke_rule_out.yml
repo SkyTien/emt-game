@@ -8,11 +8,9 @@ patient_initial:
   consciousness:
     zh-Hant: 嗜睡、口齒不清
   breath:
-    zh-Hant: 18 次/分
-    略淺: null
+    zh-Hant: 18 次/分、略淺
   pulse:
-    zh-Hant: 96 次/分
-    規律: null
+    zh-Hant: 96 次/分、規律
   skin:
     zh-Hant: 蒼白、濕冷、冒冷汗
   glucose:
@@ -119,11 +117,11 @@ outcomes:
       zh-Hant: 教科書級處置
     text:
       zh-Hant: 你在初評完成病史詢問與血糖量測，以 CPSS 系統性排除中風，正確判定危急度，並在確認吞嚥能力後給予口服葡萄糖。整體流程符合台灣 EMT-1 教學標準。
-    illustration: /illustrations/outcomes/recover.png
+    illustration: /illustrations/outcomes/placeholder.svg
   - id: failed
     when: 預設
     title:
       zh-Hant: 處置細節待加強
     text:
       zh-Hant: 雖完成救護，但建議更熟練初評與二評的動作配置。
-    illustration: /illustrations/outcomes/handoff.png
+    illustration: /illustrations/outcomes/placeholder.svg

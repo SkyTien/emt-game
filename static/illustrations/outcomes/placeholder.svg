@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">情境結果插畫預留圖</title>
+  <desc id="desc">正式醫療插畫完成前使用的本地預留圖</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#17324d"/><stop offset="1" stop-color="#0b1724"/></linearGradient></defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="600" cy="280" r="112" fill="none" stroke="#fbd38d" stroke-width="18"/>
+  <path d="M535 280h130M600 215v130" stroke="#fbd38d" stroke-width="18" stroke-linecap="round"/>
+  <text x="600" y="465" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="42">EMT 情境結果</text>
+  <text x="600" y="520" text-anchor="middle" fill="#b7c7d8" font-family="sans-serif" font-size="26">Illustration placeholder</text>
+</svg>

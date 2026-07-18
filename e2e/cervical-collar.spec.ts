@@ -32,7 +32,8 @@ test('上頸圈全對完成 → 結算 3 星 → localStorage 有記錄', async 
 	await page.getByRole('link', { name: /上頸圈/ }).click();
 	await expect(page).toHaveURL(/\/techniques\/cervical_collar\/play/);
 
-	// Step 1: 戴手套口罩 (hand bag - 預設)
+	// Step 1: 戴手套口罩 (hand bag)
+	await switchBag(page, '徒手');
 	await clickAction(page, '戴手套口罩');
 
 	// Step 2: 徒手固定頭部 (hand bag)
@@ -42,7 +43,7 @@ test('上頸圈全對完成 → 結算 3 星 → localStorage 有記錄', async 
 	await clickAction(page, '二度評估全身');
 
 	// Step 4: 挑選頸圈尺寸 (jumpkit)
-	await switchBag(page, '三寶袋');
+	await switchBag(page, '救護包 (Jumpkit)');
 	await clickAction(page, '挑選頸圈尺寸');
 
 	// Step 5: 套上頸圈 (jumpkit)
@@ -52,7 +53,7 @@ test('上頸圈全對完成 → 結算 3 星 → localStorage 有記錄', async 
 	await expect(page).toHaveURL(/\/techniques\/cervical_collar\/result/, { timeout: 5_000 });
 
 	// 檢查 3 星
-	await expect(page.getByText('3 星')).toBeVisible();
+	await expect(page.getByLabel('3/3')).toBeVisible();
 
 	// 確認 localStorage 有記錄
 	const stored = await page.evaluate(() => {

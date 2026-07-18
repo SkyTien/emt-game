@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n';
+	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 	import { untrack } from 'svelte';
 	import { ScenarioEngine } from '$lib/engine/scenario-engine';
-	import { findPartnerActions, findPlayerActions, pickPartnerDelayMs } from '$lib/engine/partner-ai';
+	import { findPartnerActions, pickPartnerDelayMs } from '$lib/engine/partner-ai';
+	import { saveScenarioRun } from '$lib/progress/store';
 	import ActionList from '$lib/ui/ActionList.svelte';
 	import Toolbox from '$lib/ui/Toolbox.svelte';
 	import PatientStatus from '$lib/ui/PatientStatus.svelte';
@@ -13,8 +16,8 @@
 	import LogView from '$lib/ui/LogView.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Typewriter from '$lib/ui/Typewriter.svelte';
-	import type { ActorRole, ScenarioState, Location, Feedback } from '$lib/engine/scenario-engine';
-	import type { Action, BagId } from '$lib/types/content';
+	import type { ActorRole, ScenarioState, Feedback } from '$lib/engine/scenario-engine';
+	import type { Action } from '$lib/types/content';
 
 	let { data } = $props();
 	const scenario = $derived(data.scenario);
@@ -24,9 +27,10 @@
 
 	$effect.pre(() => {
 		if (scenario) {
-			const storedRole = scenario.player_role === 'either'
-				? (sessionStorage.getItem(`emt1game:role:${scenario.id}`) ?? 'lead') as ActorRole
-				: scenario.player_role as ActorRole;
+			const storedRole =
+				scenario.player_role === 'either'
+					? ((sessionStorage.getItem(`emt1game:role:${scenario.id}`) ?? 'lead') as ActorRole)
+					: (scenario.player_role as ActorRole);
 			gameState = ScenarioEngine.init(scenario, storedRole, Date.now());
 		}
 	});
@@ -37,6 +41,7 @@
 	let toastKey = $state(0);
 	let showLog = $state(false);
 	let narrativeFinished = $state(false);
+	let finalized = false;
 
 	// Mode State
 	let activeMode = $state<'scene' | 'assessment' | 'toolbox' | null>(null);
@@ -67,6 +72,41 @@
 		}
 	});
 
+	function finishNarrative() {
+		narrativeFinished = true;
+		gameState = ScenarioEngine.startPhase(gameState, Date.now());
+	}
+
+	$effect(() => {
+		if (!gameState?.phaseStarted || gameState.finalOutcomeId) return;
+		const timer = setInterval(() => {
+			gameState = ScenarioEngine.tick(gameState, Date.now());
+		}, 250);
+		return () => clearInterval(timer);
+	});
+
+	$effect(() => {
+		if (!gameState?.finalOutcomeId || finalized) return;
+		finalized = true;
+		const stars = ScenarioEngine.getStars(scenario, gameState.finalOutcomeId);
+		saveScenarioRun(scenario.id, gameState.playerRole, stars);
+		sessionStorage.setItem(
+			`emt1game:lastResult:${scenario.id}`,
+			JSON.stringify({
+				version: 1,
+				outcomeId: gameState.finalOutcomeId,
+				correctActions: gameState.correctActions,
+				wrongActions: gameState.wrongActions,
+				worsenLevel: gameState.worsenLevel,
+				stars,
+				role: gameState.playerRole,
+				startTimeMs: gameState.startTimeMs,
+				log: gameState.log
+			})
+		);
+		goto(`${base}/scenarios/${scenario.id}/result`);
+	});
+
 	$effect(() => {
 		// Reset narrative finished state and active mode when the narrative block changes
 		const _ = narrativeId;
@@ -75,6 +115,17 @@
 	});
 
 	const allActions = $derived(registry.all());
+	const playerActions = $derived(
+		allActions.filter(
+			(action) =>
+				!action.default_role ||
+				action.default_role === 'either' ||
+				action.default_role === gameState.playerRole
+		)
+	);
+	const playerRegistry = $derived({
+		byBag: (bag: Action['bag']) => playerActions.filter((action) => action.bag === bag)
+	});
 
 	// Scene tab：現場 / 行政 / 危急判定 / 後送
 	const SCENE_IDS = new Set([
@@ -89,21 +140,19 @@
 		'transport_to_hospital'
 	]);
 
-	const sceneActions = $derived(allActions.filter((a) => SCENE_IDS.has(a.id)));
+	const sceneActions = $derived(playerActions.filter((a) => SCENE_IDS.has(a.id)));
 	const assessmentActions = $derived(
-		allActions.filter((a) => a.bag === 'hand' && !SCENE_IDS.has(a.id))
+		playerActions.filter((a) => a.bag === 'hand' && !SCENE_IDS.has(a.id))
 	);
 	const partnerActionIds = $derived(gameState ? findPartnerActions(gameState) : []);
 	const partnerActions = $derived<Action[]>(
 		partnerActionIds.map((id) => registry.tryById(id)).filter((a): a is Action => a !== null)
 	);
 
-	// 副手視角：主手（player）的動作由同伴 AI 自動延遲執行，每次只 schedule 第一個可執行動作
+	// 另一位隊員會自動執行目前符合條件、且指定給他的動作。
 	$effect(() => {
 		if (!gameState || gameState.finalOutcomeId) return;
-		if (gameState.playerRole !== 'assist') return;
-
-		const pendingIds = findPlayerActions(gameState);
+		const pendingIds = findPartnerActions(gameState);
 		if (pendingIds.length === 0) return;
 
 		const actionId = pendingIds[0];
@@ -111,23 +160,22 @@
 			untrack(() => {
 				const action = registry.tryById(actionId);
 				if (action) {
-					toastQueue = [...toastQueue, `主手：${action.label['zh-Hant']}`];
+					toastQueue = [...toastQueue, `${$_('timeline.by_partner')}：${action.label['zh-Hant']}`];
 				}
-				gameState = ScenarioEngine.performAction(gameState, actionId, gameState.playerRole === 'lead' ? 'assist' : 'lead', Date.now()).state;
+				const role: ActorRole = gameState.playerRole === 'lead' ? 'assist' : 'lead';
+				gameState = ScenarioEngine.performAction(gameState, actionId, role, Date.now()).state;
 			});
 		}, pickPartnerDelayMs());
 
 		return () => clearTimeout(timer);
 	});
 
-	// Mock bag locations (everyone brings everything to scene for now)
-	const bagLocations = $derived({
-		hand: 'on_scene',
-		o2kit: 'on_scene',
-		jumpkit: 'on_scene',
-		aed: 'on_scene',
-		vehicle: 'on_scene'
-	} as Record<BagId, Location>);
+	const bagLocations = $derived(gameState?.bagLocations ?? {});
+	const sceneIllustration = $derived.by(() => {
+		const src = currentPhase?.illustration || scenario.illustration;
+		if (!src || /^https?:\/\//.test(src)) return src;
+		return src.startsWith('/') ? `${base}${src}` : `${base}/${src}`;
+	});
 
 	function handleAction(actionId: string, by: ActorRole) {
 		const action = registry.tryById(actionId);
@@ -155,7 +203,7 @@
 	<!-- 頂部 HUD -->
 	<div class="hud-top">
 		<div class="hud-row">
-			<a href="/scenarios" class="btn-icon" aria-label={$_('scenario.back_to_list')}>
+			<a href={`${base}/scenarios`} class="btn-icon" aria-label={$_('scenario.back_to_list')}>
 				<Icon name="ArrowLeft" size={24} />
 			</a>
 			<div class="scenario-info">
@@ -189,14 +237,9 @@
 	<div class="game-viewport">
 		<!-- 背景圖層 -->
 		<div class="scene-layer">
-			{#if currentPhase?.illustration || scenario.illustration}
+			{#if sceneIllustration}
 				<div class="scene-img-wrapper">
-					<img
-						src={currentPhase?.illustration || scenario.illustration}
-						alt="Scene"
-						class="scene-img"
-						transition:fade
-					/>
+					<img src={sceneIllustration} alt="Scene" class="scene-img" transition:fade />
 				</div>
 			{/if}
 			<div class="scene-overlay"></div>
@@ -209,11 +252,7 @@
 					<div class="scene-spacer"></div>
 					<div class="narrative-box glass-panel">
 						{#key narrativeId}
-							<Typewriter
-								text={currentNarrative}
-								speed={40}
-								onfinish={() => (narrativeFinished = true)}
-							/>
+							<Typewriter text={currentNarrative} speed={40} onfinish={finishNarrative} />
 						{/key}
 					</div>
 				</div>
@@ -250,7 +289,7 @@
 				<div class="mode-panel glass-panel fill" in:fade={{ duration: 150 }}>
 					<div class="panel-content toolbox-pad">
 						<Toolbox
-							{registry}
+							registry={playerRegistry}
 							{bagLocations}
 							completedIds={gameState.completedRequiredIds}
 							{partnerActions}
@@ -303,7 +342,13 @@
 
 	{#if toastQueue.length > 0}
 		{#key toastKey}
-			<Toast message={toastQueue[0]} onClose={() => { toastQueue = toastQueue.slice(1); toastKey += 1; }} />
+			<Toast
+				message={toastQueue[0]}
+				onClose={() => {
+					toastQueue = toastQueue.slice(1);
+					toastKey += 1;
+				}}
+			/>
 		{/key}
 	{/if}
 

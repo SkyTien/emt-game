@@ -7,7 +7,7 @@ import { ScenarioEngine, type ScenarioState } from './scenario-engine';
  *
  * 返回動作 ID 列表（對應已規範化的 action_id）。
  */
-const partnerRole = (playerRole: 'lead' | 'assist') => playerRole === 'lead' ? 'assist' : 'lead';
+const partnerRole = (playerRole: 'lead' | 'assist') => (playerRole === 'lead' ? 'assist' : 'lead');
 
 export function findPartnerActions(state: ScenarioState): string[] {
 	const phase = ScenarioEngine.currentPhase(state);
