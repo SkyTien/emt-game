@@ -44,4 +44,6 @@ playwright/.cache/
 
 # Claude Code local settings(不含專案共用)
 .claude/settings.local.json
-.gitnexus
+
+# codebase-memory local/shared graph artifact (not needed for this solo project)
+.codebase-memory/
