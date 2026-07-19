@@ -11,7 +11,7 @@
 		"test:watch": "vitest",
 		"test:e2e": "playwright test",
 		"typecheck": "node --import tsx/esm node_modules/.bin/svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"validate:content": "tsx scripts/validate-content.ts",
+		"validate:content": "svelte-kit sync && tsx scripts/validate-content.ts",
 		"generate:action-ref": "tsx scripts/generate-action-reference.ts",
 		"lint:i18n": "tsx scripts/i18n-lint.ts",
 		"lint": "eslint . && prettier --check . && npm run lint:i18n",
