@@ -112,6 +112,7 @@ function resolveScenarioForValidation(
 	return {
 		...resolvedParent,
 		...raw,
+		catalog: { ...resolvedParent.catalog, ...raw.catalog },
 		phases: [...resolvedParent.phases, ...(raw.phases ?? [])],
 		extends: undefined
 	};

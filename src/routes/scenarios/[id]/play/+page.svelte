@@ -11,6 +11,7 @@
 	import Toolbox from '$lib/ui/Toolbox.svelte';
 	import PatientStatus from '$lib/ui/PatientStatus.svelte';
 	import PhaseProgress from '$lib/ui/PhaseProgress.svelte';
+	import Timer from '$lib/ui/Timer.svelte';
 	import FeedbackOverlay from '$lib/ui/FeedbackOverlay.svelte';
 	import Toast from '$lib/ui/Toast.svelte';
 	import LogView from '$lib/ui/LogView.svelte';
@@ -42,6 +43,7 @@
 	let showLog = $state(false);
 	let narrativeFinished = $state(false);
 	let finalized = false;
+	let nowMs = $state(Date.now());
 
 	// Mode State
 	let activeMode = $state<'scene' | 'assessment' | 'toolbox' | null>(null);
@@ -57,7 +59,6 @@
 	const currentPhase = $derived(gameState ? ScenarioEngine.currentPhase(gameState) : null);
 	const doneRequired = $derived(gameState?.completedRequiredIds.size ?? 0);
 	const totalRequired = $derived(currentPhase?.required.length ?? 0);
-	const hpPercentage = $derived(Math.max(0, 100 - (gameState?.consecutiveMistakes ?? 0) * 20));
 
 	let currentNarrative = $state('');
 	let narrativeId = $state(0);
@@ -80,7 +81,8 @@
 	$effect(() => {
 		if (!gameState?.phaseStarted || gameState.finalOutcomeId) return;
 		const timer = setInterval(() => {
-			gameState = ScenarioEngine.tick(gameState, Date.now());
+			nowMs = Date.now();
+			gameState = ScenarioEngine.tick(gameState, nowMs);
 		}, 250);
 		return () => clearInterval(timer);
 	});
@@ -208,13 +210,14 @@
 			</a>
 			<div class="scenario-info">
 				<h1>{scenario.title['zh-Hant']}</h1>
-				<PhaseProgress done={doneRequired} total={totalRequired} />
-				<div class="hp-bar-container">
-					<div
-						class="hp-bar-fill"
-						style="width: {hpPercentage}%"
-						class:critical={hpPercentage <= 40}
-					></div>
+				<div class="hud-status">
+					<PhaseProgress done={doneRequired} total={totalRequired} />
+					<Timer
+						startMs={gameState.phaseStartTimeMs}
+						{nowMs}
+						timeoutSec={currentPhase?.timeout}
+						active={gameState.phaseStarted}
+					/>
 				</div>
 			</div>
 			<button
@@ -336,7 +339,11 @@
 	<!-- 反饋層 -->
 	{#if lastFeedback}
 		{#key feedbackKey}
-			<FeedbackOverlay correct={lastFeedback.correct} onClose={() => (lastFeedback = null)} />
+			<FeedbackOverlay
+				correct={lastFeedback.correct}
+				message={$_(`feedback.${lastFeedback.message}`)}
+				onClose={() => (lastFeedback = null)}
+			/>
 		{/key}
 	{/if}
 
@@ -454,24 +461,11 @@
 		font-weight: 600;
 	}
 
-	/* HP Bar */
-	.hp-bar-container {
-		height: 6px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 3px;
-		margin-top: 0.5rem;
-		overflow: hidden;
-		width: 100%;
-	}
-	.hp-bar-fill {
-		height: 100%;
-		background: #48bb78;
-		transition:
-			width 0.3s ease,
-			background-color 0.3s ease;
-	}
-	.hp-bar-fill.critical {
-		background: #e53e3e;
+	.hud-status {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
 	}
 
 	/* 提示框 */

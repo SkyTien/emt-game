@@ -3,6 +3,17 @@ schema_version: 1
 title:
   zh-Hant: 室內長者救護
 illustration: /illustrations/scenes/indoor_hypoglycemia_wide.png
+catalog:
+  summary:
+    zh-Hant: 從意識改變辨識低血糖，完成聚焦評估、中風排除與安全處置。
+  difficulty: beginner
+  estimated_minutes: 5
+  section:
+    zh-Hant: 內科救護
+  tags:
+    - { zh-Hant: 低血糖 }
+    - { zh-Hant: 意識改變 }
+  sort: 30
 player_role: lead
 patient_initial:
   consciousness:

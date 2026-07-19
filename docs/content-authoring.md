@@ -10,9 +10,10 @@
 2. [可翻譯欄位 (LocalizedString)](#可翻譯欄位-localizedstring)
 3. [動作 (actions.yml)](#動作-actionsyml)
 4. [單項技術 (techniques/\*.yml)](#單項技術-techniquesyml)
-5. [情境演練 (scenarios/\*.yml)](#情境演練-scenariosyml)
-6. [驗證與常見錯誤](#驗證與常見錯誤)
-7. [VSCode 設定建議](#vscode-設定建議)
+5. [目錄卡片 (catalog)](#目錄卡片-catalog)
+6. [情境演練 (scenarios/\*.yml)](#情境演練-scenariosyml)
+7. [驗證與常見錯誤](#驗證與常見錯誤)
+8. [VSCode 設定建議](#vscode-設定建議)
 
 ---
 
@@ -88,7 +89,7 @@ title: 路倒成人 OHCA
 ### 注意事項
 
 - `id` 一旦上線就不能改，修改會導致既有情境/單項引用失效
-- `label.zh-Hant` 的值必須與情境 YAML 中 `required[].action` 的中文完全一致
+- 情境與單項一律以穩定的 action `id` 引用；顯示名稱可獨立修訂
 - 每個動作需補對應的 icon SVG（詳見 [visual-guide.md](visual-guide.md)）
 
 ---
@@ -129,6 +130,14 @@ description:
 body_region: head
 illustration: /illustrations/scenes/bvm.svg
 
+catalog:
+  summary: { zh-Hant: 練習雙手固定面罩與正壓通氣順序。 }
+  difficulty: beginner
+  estimated_minutes: 3
+  section: { zh-Hant: 呼吸道 }
+  tags:
+    - { zh-Hant: BVM }
+
 steps:
   - id: ppe
     action_id: put_on_gloves_mask # 推薦：使用 action_id
@@ -148,6 +157,53 @@ steps:
 
 ---
 
+## 目錄卡片 (catalog)
+
+`catalog` 只控制首頁、情境目錄與技術目錄的呈現，不會改變醫療流程、計分或結局。情境與單項都可使用同一格式；所有欄位皆可省略，省略時系統會從既有內容推估摘要、難度與時間。
+
+```yaml
+catalog:
+  summary:
+    zh-Hant: 中年男性倒臥公園，與 AI 副手協作完成評估與復甦。
+  difficulty: intermediate # beginner / intermediate / advanced
+  estimated_minutes: 5 # 1 到 60 的整數
+  section:
+    zh-Hant: 循環與復甦
+  tags:
+    - { zh-Hant: OHCA }
+    - { zh-Hant: AI 副手 }
+  featured: true # 優先作為首頁推薦
+  sort: 10 # 數字越小越前面
+```
+
+### 一般情境或單項
+
+建立 YAML 並填入 `catalog` 後，目錄會自動顯示卡片，不需要修改 Svelte 或 TypeScript。`summary`、`section` 與每個 `tags` 項目都必須使用 LocalizedString。
+
+### 快速出勤變體
+
+多個隱藏子情境可用同一個 `variant_group` 組成一張隨機出勤卡。父情境提供共用卡片資料，子情境只需開啟 quick play：
+
+```yaml
+# 父情境
+hidden: true
+catalog:
+  summary: { zh-Hant: 路倒成人 OHCA 隨機病況。 }
+  difficulty: intermediate
+  estimated_minutes: 5
+  variant_group: ohca_adult
+
+# 子情境
+extends: ohca_adult_street
+hidden: true
+catalog:
+  quick_play: true
+```
+
+`catalog` 會由父層淺層繼承；子層只需覆寫不同欄位。若子層寫入 `tags`，會完整取代父層 tags，不會自動串接。`quick_play: true` 必須能從本層或父層取得非空 `variant_group`。
+
+---
+
 ## 情境演練 (scenarios/\*.yml)
 
 檔案路徑範例：`data/scenarios/ohca_adult_street.yml`
@@ -160,6 +216,7 @@ steps:
 | `schema_version`  | ✓    | 目前為 `1`                                                         |
 | `title`           | ✓    | LocalizedString                                                    |
 | `illustration`    |      | 預設場景插畫路徑                                                   |
+| `catalog`         |      | 目錄卡片 metadata；省略時使用安全預設                              |
 | `player_role`     | ✓    | `lead / assist / either`（either 會顯示角色選擇頁）                |
 | `patient_initial` | ✓    | 初始病人狀態（consciousness / breath / pulse，皆 LocalizedString） |
 | `crew`            | ✓    | 定義主副手（lead / assist），各含 `carries`（bag 陣列）與 `duty`   |
@@ -181,15 +238,15 @@ steps:
 
 ```yaml
 required:
-  - { action_id: cpr_adult, by: player } # 只有玩家可執行
-  - { action_id: call_dispatch, by: partner } # 由同伴 AI 執行
+  - { action_id: cpr_adult, by: lead } # 只有主手可執行
+  - { action_id: call_dispatch, by: assist } # 只有副手可執行
   - { action_id: aed_pads } # 任何人皆可
   - { action_id: aed_shock, set_flag: 已電擊 } # 完成後設定旗標，用於 outcome 條件
 ```
 
 - `action_id`: **推薦**，對應 `actions.yml` 的 `id`
 - `action`: **已棄用**，舊版本 (Chinese label)，需運行遷移指令更新
-- `by`: `player / partner`（省略表示任何人）
+- `by`: `lead / assist`（省略表示任何角色都可執行）
 - `set_flag`: 完成後設定一個旗標，供 `outcomes[].when` 條件使用
 
 ### outcomes 欄位
@@ -251,7 +308,7 @@ phases:
   - id: cpr
     narrative: { zh-Hant: 確認無脈搏，立即 CPR。 }
     required:
-      - { action_id: cpr_adult, by: player }
+      - { action_id: cpr_adult, by: lead }
       - { action_id: aed_shock, set_flag: 已電擊 }
     timeout: 60
     on_skip:

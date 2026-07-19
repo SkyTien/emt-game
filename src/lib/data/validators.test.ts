@@ -155,6 +155,30 @@ describe('validateScenario', () => {
 		expect(r.ok).toBe(true);
 	});
 
+	it('accepts valid authorable catalog metadata', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.catalog = {
+			summary: { 'zh-Hant': '測試摘要' },
+			difficulty: 'intermediate',
+			estimated_minutes: 5,
+			section: { 'zh-Hant': '循環與復甦' },
+			tags: [{ 'zh-Hant': 'OHCA' }],
+			featured: true,
+			sort: 10,
+			variant_group: 'ohca',
+			quick_play: true
+		};
+		expect(validateScenario(scenario, reg).ok).toBe(true);
+	});
+
+	it('rejects invalid catalog time and ungrouped quick play', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.catalog = { estimated_minutes: 0, quick_play: true };
+		const result = validateScenario(scenario, reg);
+		expect(result.errors.some((e) => e.code === 'invalid_estimated_minutes')).toBe(true);
+		expect(result.errors.some((e) => e.code === 'missing_variant_group')).toBe(true);
+	});
+
 	it('rejects timeout < 5', () => {
 		const bad = structuredClone(goodScenario);
 		bad.phases[0].timeout = 3;
@@ -243,6 +267,25 @@ describe('validateTechnique', () => {
 		const r = validateTechnique(goodTechnique, reg);
 		expect(r.errors).toHaveLength(0);
 		expect(r.ok).toBe(true);
+	});
+
+	it('validates technique catalog metadata', () => {
+		const technique = structuredClone(goodTechnique);
+		technique.catalog = {
+			summary: { 'zh-Hant': '固定頸椎的單項訓練' },
+			difficulty: 'beginner',
+			estimated_minutes: 3,
+			section: { 'zh-Hant': '創傷處置' },
+			tags: [{ 'zh-Hant': '頸椎' }]
+		};
+		expect(validateTechnique(technique, reg).ok).toBe(true);
+
+		technique.catalog.estimated_minutes = 2.5;
+		expect(
+			validateTechnique(technique, reg).errors.some(
+				(error) => error.code === 'invalid_estimated_minutes'
+			)
+		).toBe(true);
 	});
 
 	it('rejects empty steps', () => {

@@ -1,14 +1,22 @@
 :root {
-	--c-bg: #ffffff;
-	--c-bg-soft: #f4f4f5;
-	--c-text: #18181b;
-	--c-text-soft: #52525b;
-	--c-line: #18181b;
-	--c-accent: #dc2626;
-	--c-o2: #2563eb;
-	--c-border: #d4d4d8;
-	--c-warn-bg: #fee2e2;
-	--c-good: #16a34a;
+	color-scheme: dark;
+	--c-bg: #07131f;
+	--c-bg-soft: #0b1d2d;
+	--c-panel: #10263a;
+	--c-panel-soft: #163149;
+	--c-text: #f4f8fb;
+	--c-text-soft: #b4c5d3;
+	--c-text-muted: #7890a2;
+	--c-line: #dbe8f0;
+	--c-accent: #ef4444;
+	--c-dispatch: #facc15;
+	--c-status: #2dd4bf;
+	--c-o2: #38bdf8;
+	--c-border: rgba(148, 180, 202, 0.16);
+	--c-border-strong: rgba(250, 204, 21, 0.42);
+	--c-warn-bg: rgba(239, 68, 68, 0.14);
+	--c-good: #4ade80;
+	--shadow-card: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
 * {
@@ -20,6 +28,10 @@ body {
 	margin: 0;
 	padding: 0;
 	background: var(--c-bg);
+	background-image:
+		radial-gradient(circle at 15% -10%, rgba(31, 91, 126, 0.3), transparent 36rem),
+		linear-gradient(180deg, #07131f, #081724 70%, #07131f);
+	background-attachment: fixed;
 	color: var(--c-text);
 	font-family:
 		system-ui,
@@ -30,6 +42,8 @@ body {
 		sans-serif;
 	line-height: 1.5;
 	-webkit-tap-highlight-color: transparent;
+	min-width: 320px;
+	min-height: 100%;
 }
 
 button {
@@ -38,7 +52,16 @@ button {
 }
 
 a {
-	color: var(--c-accent);
+	color: var(--c-dispatch);
+}
+
+button,
+a {
+	touch-action: manipulation;
+}
+
+::selection {
+	background: rgba(250, 204, 21, 0.28);
 }
 
 /* 10.7 CSS 濾鏡規則：對外部 CC0 素材統一收斂色調 */
