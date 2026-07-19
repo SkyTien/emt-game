@@ -22,7 +22,7 @@ async function clickAction(page: import('@playwright/test').Page, actionLabel: s
 test('上頸圈全對完成 → 結算 3 星 → localStorage 有記錄', async ({ page }) => {
 	// 首頁
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'EMT-1 練功房' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'EMT TRAINING' })).toBeVisible();
 
 	// 進單項技術
 	await page.getByRole('link', { name: '單項技術' }).click();

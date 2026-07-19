@@ -6,8 +6,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- Training entry routes now use a responsive dispatch-center design with featured dispatch, progress summary, scenario cards, skill sections, and a crew briefing page.
+- Scenario and technique YAML support optional validated `catalog` metadata for summary, difficulty, duration, section, tags, ordering, featured content, and data-driven quick-play groups.
+- Scenario HUD now exposes the active countdown, narration can be skipped in one action, and engine feedback codes render specific player guidance.
+- Playwright coverage now includes ten critical flows across the dispatch hub, mobile navigation, YAML catalog ordering, quick play, crew roles, actionable feedback, ROSC and non-ROSC outcomes, progress persistence, and reset behavior.
+
 ### Fixed
 
+- Action completion marks now compare canonical action IDs instead of localized labels.
 - Scenario sessions now start phase timers only when interaction opens, finalize once, save role-specific progress, and restore result/timeline data safely.
 - Action IDs are canonical across engines and UI; repeated actions are inert, wrong-order attempts are logged, and authored vital reveal metadata controls patient assessment.
 - Content validation now rejects invalid schemas, roles, references, prerequisite/inheritance cycles, malformed outcome conditions, misplaced defaults, and missing local assets.

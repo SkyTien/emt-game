@@ -18,6 +18,24 @@ export type BodyRegion =
 
 export type Role = 'lead' | 'assist' | 'either';
 
+export type CatalogDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+/**
+ * Presentation-only metadata for training catalogs.
+ * Authors may omit every field; UI fallbacks keep legacy content playable.
+ */
+export type CatalogMetadata = {
+	summary?: LocalizedString;
+	difficulty?: CatalogDifficulty;
+	estimated_minutes?: number;
+	section?: LocalizedString;
+	tags?: LocalizedString[];
+	featured?: boolean;
+	sort?: number;
+	variant_group?: string;
+	quick_play?: boolean;
+};
+
 export type Action = {
 	id: string;
 	label: LocalizedString;
@@ -100,6 +118,7 @@ export type Scenario = {
 	crew: { lead: CrewMember; assist: CrewMember };
 	phases: Phase[];
 	outcomes: Outcome[];
+	catalog?: CatalogMetadata;
 	hidden?: boolean;
 	extends?: string;
 };
@@ -121,6 +140,7 @@ export type Technique = {
 	description: LocalizedString;
 	body_region?: BodyRegion;
 	illustration?: string;
+	catalog?: CatalogMetadata;
 	steps: TechniqueStep[];
 	hidden?: boolean;
 };

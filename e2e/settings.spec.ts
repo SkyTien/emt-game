@@ -26,7 +26,7 @@ test('設定頁清除進度 → 首頁進度歸零', async ({ page }) => {
 
 	// 重新整理首頁，確認有進度顯示
 	await page.reload();
-	await expect(page.getByRole('heading', { name: 'EMT-1 練功房' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'EMT TRAINING' })).toBeVisible();
 
 	// 進入設定頁
 	await page.getByRole('link', { name: '設定' }).click();
@@ -52,6 +52,6 @@ test('設定頁清除進度 → 首頁進度歸零', async ({ page }) => {
 	await page.goto('/');
 
 	// 確認情境列表顯示「未嘗試」或進度為 0
-	await page.getByRole('link', { name: '情境演練' }).click();
+	await page.getByRole('link', { name: '情境任務' }).click();
 	await expect(page.getByText(/未嘗試/).first()).toBeVisible({ timeout: 5_000 });
 });

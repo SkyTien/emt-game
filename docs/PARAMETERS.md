@@ -7,10 +7,11 @@
 ## 目錄
 
 1. [Actions (動作)](#actions-動作)
-2. [Scenarios (情境演練)](#scenarios-情境演練)
-3. [Techniques (單項技術)](#techniques-單項技術)
-4. [條件語法速查](#條件語法速查)
-5. [常用值列舉](#常用值列舉)
+2. [Catalog (目錄卡片)](#catalog-目錄卡片)
+3. [Scenarios (情境演練)](#scenarios-情境演練)
+4. [Techniques (單項技術)](#techniques-單項技術)
+5. [條件語法速查](#條件語法速查)
+6. [常用值列舉](#常用值列舉)
 
 ---
 
@@ -68,6 +69,40 @@ general   # 全身性動作
 
 ---
 
+## Catalog (目錄卡片)
+
+Scenario 與 Technique 都可加入以下可選區塊。它只影響首頁與目錄卡片，不改變遊戲規則；整個區塊省略時仍可正常顯示與遊玩。
+
+```yaml
+catalog:
+  summary: { zh-Hant: 顯示於卡片的簡短摘要 }
+  difficulty: intermediate
+  estimated_minutes: 5
+  section: { zh-Hant: 循環與復甦 }
+  tags:
+    - { zh-Hant: OHCA }
+  featured: true
+  sort: 10
+  variant_group: ohca_adult
+  quick_play: true
+```
+
+| 參數                | 型別                                   | 必填 | 說明                                           |
+| ------------------- | -------------------------------------- | ---- | ---------------------------------------------- |
+| `summary`           | LocalizedString                        |      | 卡片摘要；省略時取第一段 narrative/description |
+| `difficulty`        | `beginner \| intermediate \| advanced` |      | 省略時為 intermediate                          |
+| `estimated_minutes` | integer                                |      | 1–60；省略時依 timeout 或 steps 推估           |
+| `section`           | LocalizedString                        |      | 技術分類或內容分類名稱                         |
+| `tags`              | LocalizedString[]                      |      | 任意作者標籤，最多顯示前三個                   |
+| `featured`          | boolean                                |      | 是否優先作為首頁推薦                           |
+| `sort`              | number                                 |      | 越小越前；省略時為 1000                        |
+| `variant_group`     | string                                 | 條件 | 快速出勤的穩定分組 ID                          |
+| `quick_play`        | boolean                                |      | true 時納入隨機池，並要求 variant_group        |
+
+快速出勤不需要修改 route：讓多個 hidden/resolved scenario 使用同一 `variant_group` 並設 `quick_play: true` 即可。子情境會淺層繼承父情境的 catalog 欄位。
+
+---
+
 ## Scenarios (情境演練)
 
 **檔案位置**：`data/scenarios/<id>.yml`
@@ -80,6 +115,7 @@ schema_version: <number> # ✓ 必填，目前為 1
 title: <LocalizedString> # ✓ 必填，情境標題
 player_role: <Role | 'either'> # ✓ 必填，玩家角色選項
 illustration: <string> #   可選，預設場景插畫
+catalog: <CatalogMetadata> # 可選，首頁與目錄卡片呈現
 patient_initial: <PatientVitals> # ✓ 必填，初始病人狀態
 crew: <CrewConfig> # ✓ 必填，lead/assist 配置
 phases: <Phase[]> # ✓ 必填，階段陣列
@@ -96,6 +132,7 @@ hidden: <boolean> #   可選，預設 false
 | `title`           | LocalizedString                | ✓    | 遊戲標題                             | `{ zh-Hant: 路倒成人救護 }`      |
 | `player_role`     | `lead` \| `assist` \| `either` | ✓    | 玩家扮演角色；either 時顯示選擇      | `either`                         |
 | `illustration`    | string                         |      | 場景插畫路徑（PNG/SVG）              | `/illustrations/scenes/ohca.png` |
+| `catalog`         | CatalogMetadata                |      | 目錄卡片與快速出勤 metadata          | 見上方 Catalog                   |
 | `patient_initial` | PatientVitals                  | ✓    | 初始患者生命徵象                     | 見下方                           |
 | `crew`            | CrewConfig                     | ✓    | 主副手配置                           | 見下方                           |
 | `phases`          | Phase[]                        | ✓    | 遊戲階段（至少 1 個）                | 見下方                           |
@@ -200,8 +237,8 @@ required:
 required:
   - { action_id: assess_safety } # 任何人可執行
   - { action_id: put_on_gloves_mask } # 任何人
-  - { action_id: cpr_adult, by: player } # 只有玩家
-  - { action_id: call_dispatch, by: partner } # 只有同伴 AI
+  - { action_id: cpr_adult, by: lead } # 只有主手
+  - { action_id: call_dispatch, by: assist } # 只有副手 AI
   - { action_id: aed_shock, set_flag: 已電擊 } # 完成後設旗標
 ```
 
@@ -511,7 +548,7 @@ phases:
     narrative: { zh-Hant: 情節開始... }
     required:
       - { action_id: check_scene_safe }
-      - { action_id: wear_ppe, by: player }
+      - { action_id: wear_ppe, by: lead }
     timeout: 30
     on_skip:
       worsen: 1

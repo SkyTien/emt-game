@@ -3,6 +3,17 @@ schema_version: 1
 title:
   zh-Hant: 交通事故救護
 illustration: /illustrations/scenes/motorcycle_trauma.png
+catalog:
+  summary:
+    zh-Hant: 公路機車事故伴隨大量出血與頸椎風險，考驗創傷處置優先順序。
+  difficulty: advanced
+  estimated_minutes: 7
+  section:
+    zh-Hant: 創傷救護
+  tags:
+    - { zh-Hant: 創傷 }
+    - { zh-Hant: 大量出血 }
+  sort: 20
 player_role: lead
 patient_initial:
   consciousness:

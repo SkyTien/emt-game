@@ -5,9 +5,11 @@
 
 	let {
 		correct,
+		message,
 		onClose
 	}: {
 		correct: boolean;
+		message?: string;
 		onClose: () => void;
 	} = $props();
 
@@ -44,7 +46,7 @@
 			{/if}
 		</div>
 		<div class="message">
-			{correct ? $_('timeline.correct') : $_('timeline.flow_error')}
+			{message ?? (correct ? $_('timeline.correct') : $_('timeline.flow_error'))}
 		</div>
 	</div>
 </div>
@@ -79,8 +81,10 @@
 		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 	}
 	.message {
-		font-size: 1.5rem;
+		max-width: min(80vw, 420px);
+		font-size: 1.05rem;
 		font-weight: 700;
-		letter-spacing: 2px;
+		line-height: 1.45;
+		text-align: center;
 	}
 </style>
