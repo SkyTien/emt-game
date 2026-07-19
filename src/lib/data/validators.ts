@@ -1,4 +1,11 @@
-import type { Action, BagId, LocalizedString, Scenario, Technique } from '$lib/types/content';
+import type {
+	Action,
+	BagId,
+	CatalogMetadata,
+	LocalizedString,
+	Scenario,
+	Technique
+} from '$lib/types/content';
 import { BAG_IDS } from '$lib/types/content';
 import { ActionRegistry } from './registry';
 import { validateConditionExpression } from '$lib/engine/condition';
@@ -35,6 +42,7 @@ const BODY_REGIONS = [
 	'general'
 ] as const;
 const VITAL_KEYS = ['consciousness', 'breath', 'pulse', 'skin', 'glucose', 'spO2', 'bp'] as const;
+const CATALOG_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
 
 function ensureEnum(
 	value: unknown,
@@ -140,6 +148,97 @@ function ensureBag(value: unknown, field: string, errors: ValidationError[]): Ba
 		return undefined;
 	}
 	return value as BagId;
+}
+
+function validateCatalogMetadata(
+	value: unknown,
+	field: string,
+	errors: ValidationError[],
+	warnings: ValidationWarning[]
+): void {
+	if (value === undefined) return;
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+		pushError(errors, field, 'invalid_catalog', `${field}: 必須為物件`, value);
+		return;
+	}
+
+	const catalog = value as CatalogMetadata;
+	if (catalog.summary !== undefined)
+		ensureLocalized(catalog.summary, `${field}.summary`, errors, warnings);
+	if (catalog.section !== undefined)
+		ensureLocalized(catalog.section, `${field}.section`, errors, warnings);
+	if (catalog.tags !== undefined) {
+		if (!Array.isArray(catalog.tags)) {
+			pushError(errors, `${field}.tags`, 'invalid_catalog_tags', `${field}.tags: 必須為陣列`);
+		} else {
+			catalog.tags.forEach((tag, index) =>
+				ensureLocalized(tag, `${field}.tags[${index}]`, errors, warnings)
+			);
+		}
+	}
+	if (catalog.difficulty !== undefined) {
+		ensureEnum(
+			catalog.difficulty,
+			CATALOG_DIFFICULTIES,
+			`${field}.difficulty`,
+			'invalid_catalog_difficulty',
+			errors
+		);
+	}
+	if (
+		catalog.estimated_minutes !== undefined &&
+		(!Number.isInteger(catalog.estimated_minutes) ||
+			catalog.estimated_minutes < 1 ||
+			catalog.estimated_minutes > 60)
+	) {
+		pushError(
+			errors,
+			`${field}.estimated_minutes`,
+			'invalid_estimated_minutes',
+			`${field}.estimated_minutes: 必須為 1 到 60 的整數`,
+			catalog.estimated_minutes
+		);
+	}
+	if (catalog.sort !== undefined && !Number.isFinite(catalog.sort)) {
+		pushError(
+			errors,
+			`${field}.sort`,
+			'invalid_catalog_sort',
+			`${field}.sort: 必須為有限數字`,
+			catalog.sort
+		);
+	}
+	for (const key of ['featured', 'quick_play'] as const) {
+		if (catalog[key] !== undefined && typeof catalog[key] !== 'boolean') {
+			pushError(
+				errors,
+				`${field}.${key}`,
+				'invalid_catalog_boolean',
+				`${field}.${key}: 必須為 boolean`,
+				catalog[key]
+			);
+		}
+	}
+	if (
+		catalog.variant_group !== undefined &&
+		(typeof catalog.variant_group !== 'string' || catalog.variant_group.trim().length === 0)
+	) {
+		pushError(
+			errors,
+			`${field}.variant_group`,
+			'invalid_variant_group',
+			`${field}.variant_group: 必須為非空字串`,
+			catalog.variant_group
+		);
+	}
+	if (catalog.quick_play === true && !catalog.variant_group?.trim()) {
+		pushError(
+			errors,
+			`${field}.variant_group`,
+			'missing_variant_group',
+			`${field}.variant_group: quick_play 為 true 時必填`
+		);
+	}
 }
 
 export function validateActions(input: unknown): ValidationResult {
@@ -320,6 +419,7 @@ export function validateScenario(input: unknown, registry: ActionRegistry): Vali
 	ensureSchemaVersion(s.schema_version, 'scenario.schema_version', errors);
 	ensureNonEmptyString(s.id, 'scenario.id', errors);
 	ensureLocalized(s.title, 'scenario.title', errors, warnings);
+	validateCatalogMetadata(s.catalog, 'scenario.catalog', errors, warnings);
 	ensureEnum(s.player_role, ROLES, 'scenario.player_role', 'invalid_role', errors);
 	if (s.patient_initial && typeof s.patient_initial === 'object') {
 		for (const key of VITAL_KEYS) {
@@ -548,6 +648,7 @@ export function validateTechnique(input: unknown, registry: ActionRegistry): Val
 	ensureNonEmptyString(t.id, 'technique.id', errors);
 	ensureLocalized(t.title, 'technique.title', errors, warnings);
 	ensureLocalized(t.description, 'technique.description', errors, warnings);
+	validateCatalogMetadata(t.catalog, 'technique.catalog', errors, warnings);
 	if (t.body_region !== undefined)
 		ensureEnum(t.body_region, BODY_REGIONS, 'technique.body_region', 'invalid_body_region', errors);
 

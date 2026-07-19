@@ -29,6 +29,7 @@ const techniqueFiles = import.meta.glob('../../../data/techniques/*.yml', {
 let registryCache: ActionRegistry | null = null;
 let phasesCache: ActionPhase[] | null = null;
 let scenariosCache: Scenario[] | null = null;
+let allScenariosCache: Scenario[] | null = null;
 let techniquesCache: Technique[] | null = null;
 
 export function loadActions(): Action[] {
@@ -57,6 +58,13 @@ export function loadPhases(): ActionPhase[] {
 
 export function loadScenarios(): Scenario[] {
 	if (scenariosCache) return scenariosCache;
+	scenariosCache = loadAllScenarios().filter((scenario) => !scenario.hidden);
+	return scenariosCache;
+}
+
+/** Loads every resolved scenario, including hidden quick-play variants. */
+export function loadAllScenarios(): Scenario[] {
+	if (allScenariosCache) return allScenariosCache;
 
 	// 第一輪：解析所有 YAML，建立 id → raw 的 map
 	const rawMap = new Map<string, Scenario>();
@@ -68,16 +76,15 @@ export function loadScenarios(): Scenario[] {
 	// 第二輪：展開繼承，組裝最終情境
 	const list: Scenario[] = [];
 	for (const raw of rawMap.values()) {
-		if (raw.hidden) continue;
 		const resolved = resolveScenario(raw, rawMap);
 		list.push(resolved);
 	}
 
-	scenariosCache = list;
-	return list;
+	allScenariosCache = list;
+	return allScenariosCache;
 }
 
-function resolveScenario(raw: Scenario, map: Map<string, Scenario>): Scenario {
+export function resolveScenario(raw: Scenario, map: Map<string, Scenario>): Scenario {
 	if (!raw.extends) return raw;
 
 	const parent = map.get(raw.extends);
@@ -87,9 +94,17 @@ function resolveScenario(raw: Scenario, map: Map<string, Scenario>): Scenario {
 	return {
 		...resolvedParent,
 		...raw,
+		catalog: { ...resolvedParent.catalog, ...raw.catalog },
 		phases: [...resolvedParent.phases, ...(raw.phases ?? [])],
 		extends: undefined
 	};
+}
+
+/** Quick-play scenarios are explicit, resolved content rather than route-level ID lists. */
+export function loadQuickPlayScenarios(): Scenario[] {
+	return loadAllScenarios().filter(
+		(scenario) => scenario.catalog?.quick_play === true && Boolean(scenario.catalog.variant_group)
+	);
 }
 
 export function getScenarioById(id: string): Scenario | null {

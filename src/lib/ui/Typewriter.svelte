@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { text = '', speed = 30, onfinish } = $props();
+	import { _ } from 'svelte-i18n';
+
+	let {
+		text = '',
+		speed = 30,
+		onfinish
+	}: { text?: string; speed?: number; onfinish?: () => void } = $props();
 
 	let displayedText = $state('');
 	let currentIndex = $state(0);
@@ -7,24 +13,17 @@
 	let isTyping = $state(true);
 	let finished = $state(false);
 
-	function handleClick() {
+	function complete() {
 		if (finished) return;
-
-		if (isTyping) {
-			// Skip typing
-			if (interval) clearInterval(interval);
-			displayedText = text;
-			currentIndex = text.length;
-			isTyping = false;
-		} else {
-			// Typing is done, wait for click to finish
-			finished = true;
-			if (onfinish) onfinish();
-		}
+		if (interval) clearInterval(interval);
+		displayedText = text;
+		currentIndex = text.length;
+		isTyping = false;
+		finished = true;
+		onfinish?.();
 	}
 
 	$effect(() => {
-		// Whenever text changes, reset
 		displayedText = '';
 		currentIndex = 0;
 		isTyping = true;
@@ -36,12 +35,7 @@
 				displayedText += text[currentIndex];
 				currentIndex++;
 			} else {
-				clearInterval(interval);
-				isTyping = false;
-				if (!finished) {
-					finished = true;
-					if (onfinish) onfinish();
-				}
+				complete();
 			}
 		}, speed);
 
@@ -49,38 +43,40 @@
 	});
 </script>
 
-<div
-	onclick={handleClick}
-	onkeydown={(e) => e.key === 'Enter' && handleClick()}
-	role="button"
-	tabindex="0"
-	class="typewriter-text"
->
-	{displayedText}
+<div class="typewriter-text" aria-live="polite">
+	<p>
+		{displayedText}{#if isTyping}<span class="cursor" aria-hidden="true">|</span>{/if}
+	</p>
 	{#if isTyping}
-		<span class="cursor">|</span>
-	{:else if !finished}
-		<span class="continue-prompt">▼</span>
+		<button type="button" class="skip" onclick={complete}>{$_('scenario.skip_narrative')}</button>
 	{/if}
 </div>
 
 <style>
 	.typewriter-text {
-		cursor: pointer;
-		display: block;
-		outline: none;
+		display: grid;
+		gap: 0.65rem;
 		position: relative;
+	}
+	p {
+		margin: 0;
 	}
 	.cursor {
 		animation: blink 1s step-end infinite;
 		opacity: 0.7;
 		font-weight: bold;
 	}
-	.continue-prompt {
-		display: inline-block;
-		margin-left: 8px;
-		color: #63b3ed;
-		animation: bounce 1s infinite;
+	.skip {
+		justify-self: end;
+		min-height: 36px;
+		padding: 0.35rem 0.7rem;
+		border-radius: 999px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(7, 19, 31, 0.5);
+		color: rgba(255, 255, 255, 0.78);
+		font-size: 0.75rem;
+		font-weight: 700;
+		cursor: pointer;
 	}
 	@keyframes blink {
 		0%,
@@ -89,15 +85,6 @@
 		}
 		50% {
 			opacity: 0;
-		}
-	}
-	@keyframes bounce {
-		0%,
-		100% {
-			transform: translateY(0);
-		}
-		50% {
-			transform: translateY(3px);
 		}
 	}
 </style>

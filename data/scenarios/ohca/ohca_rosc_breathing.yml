@@ -4,6 +4,8 @@ hidden: true
 extends: ohca_adult_street
 title:
   zh-Hant: 路倒成人救護
+catalog:
+  quick_play: true
 phases:
   - id: post_aed_assess
     narrative:

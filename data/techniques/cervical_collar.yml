@@ -6,6 +6,18 @@ description:
   zh-Hant: 為疑似頸椎傷患套上頸圈,避免次發性脊髓損傷
 body_region: neck
 illustration: /illustrations/scenes/cervical_collar.svg
+catalog:
+  summary:
+    zh-Hant: 從徒手固定、頸部評估、選擇尺寸到完成頸圈固定。
+  difficulty: beginner
+  estimated_minutes: 3
+  section:
+    zh-Hant: 創傷處置
+  tags:
+    - { zh-Hant: 頸椎保護 }
+    - { zh-Hant: 器材操作 }
+  featured: true
+  sort: 10
 steps:
   - id: ppe
     action_id: wear_ppe

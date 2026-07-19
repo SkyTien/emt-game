@@ -293,7 +293,7 @@
 					{#each currentActions as action}
 						<button
 							class="action-item"
-							class:done={completedIds.has(action.label['zh-Hant'])}
+							class:done={completedIds.has(action.id)}
 							onclick={() => handleAction(action)}
 						>
 							<span class="item-icon">
@@ -302,7 +302,7 @@
 							<span class="item-label">
 								{localize(action.label, $locale ?? 'zh-Hant')}
 							</span>
-							{#if completedIds.has(action.label['zh-Hant'])}
+							{#if completedIds.has(action.id)}
 								<span class="check">✓</span>
 							{/if}
 						</button>

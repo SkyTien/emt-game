@@ -4,6 +4,19 @@ hidden: true
 title:
   zh-Hant: 路倒成人救護（基底）
 illustration: /illustrations/scenes/ohca_adult_street.png
+catalog:
+  summary:
+    zh-Hant: 中年男性倒臥公園，與 AI 副手協作完成評估、CPR 與 AED 處置。
+  difficulty: intermediate
+  estimated_minutes: 5
+  section:
+    zh-Hant: 循環與復甦
+  tags:
+    - { zh-Hant: OHCA }
+    - { zh-Hant: AI 副手 }
+  featured: true
+  sort: 10
+  variant_group: ohca_adult
 player_role: either
 patient_initial:
   consciousness:
