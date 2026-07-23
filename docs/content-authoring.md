@@ -73,6 +73,7 @@ title: 路倒成人 OHCA
 | `body_region`  |      | 身體部位：`head / neck / chest / wrist / abdomen / leg / arm / general` |
 | `icon`         |      | icon 檔案路徑（如 `static/illustrations/actions/check_pulse.svg`）      |
 | `explain`      |      | 時間軸回顧顯示的學習說明，LocalizedString                               |
+| `timing`       |      | 動作預設耗時與可否中止；省略時維持即時完成                              |
 
 ### 範例
 
@@ -82,6 +83,9 @@ title: 路倒成人 OHCA
   bag: hand
   default_role: lead
   body_region: head
+  timing:
+    duration_seconds: 10
+    interruptible: true
   explain:
     zh-Hant: 瞳孔大小、對光反射、等大等圓，HEENT 的一部分
 ```
@@ -91,6 +95,8 @@ title: 路倒成人 OHCA
 - `id` 一旦上線就不能改，修改會導致既有情境/單項引用失效
 - 情境與單項一律以穩定的 action `id` 引用；顯示名稱可獨立修訂
 - 每個動作需補對應的 icon SVG（詳見 [visual-guide.md](visual-guide.md)）
+- `duration_seconds` 必須是 0–600 的整數；大於 0 時必須明確設定 `interruptible`
+- 實際醫療動作時間須經 EMT reviewer 核可，不要只為遊戲節奏任意填值
 
 ---
 
@@ -242,12 +248,19 @@ required:
   - { action_id: call_dispatch, by: assist } # 只有副手可執行
   - { action_id: aed_pads } # 任何人皆可
   - { action_id: aed_shock, set_flag: 已電擊 } # 完成後設定旗標，用於 outcome 條件
+  - action_id: cpr_adult
+    by: lead
+    timing:
+      duration_seconds: 20
+      interruptible: true
 ```
 
 - `action_id`: **推薦**，對應 `actions.yml` 的 `id`
 - `action`: **已棄用**，舊版本 (Chinese label)，需運行遷移指令更新
 - `by`: `lead / assist`（省略表示任何角色都可執行）
 - `set_flag`: 完成後設定一個旗標，供 `outcomes[].when` 條件使用
+- `after`: 必須先完成的同 phase `action_id`
+- `timing`: 局部覆寫 action timing；未提供的欄位沿用 action 預設
 
 ### outcomes 欄位
 

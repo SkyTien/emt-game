@@ -27,6 +27,21 @@
 				{#if entry.kind === 'action'}
 					<span class="action-name">{entry.actionLabel}</span>
 					<span class="role-tag">{entry.by}</span>
+				{:else if entry.kind === 'task_queued'}
+					<span class="system-msg">
+						{$_('scenario.log_task_queued', { values: { action: entry.actionId } })}
+					</span>
+					<span class="role-tag">{entry.by}</span>
+				{:else if entry.kind === 'task_started'}
+					<span class="system-msg">
+						{$_('scenario.log_task_started', { values: { action: entry.actionId } })}
+					</span>
+					<span class="role-tag">{entry.by}</span>
+				{:else if entry.kind === 'task_interrupted'}
+					<span class="system-msg interrupted">
+						{$_('scenario.log_task_interrupted', { values: { action: entry.actionId } })}
+					</span>
+					<span class="role-tag">{entry.by}</span>
 				{:else}
 					<span class="system-msg">
 						{#if entry.kind === 'phase_advance'}
@@ -95,5 +110,8 @@
 		color: #4299e1;
 		font-weight: bold;
 		font-size: 0.9rem;
+	}
+	.system-msg.interrupted {
+		color: #f59e0b;
 	}
 </style>

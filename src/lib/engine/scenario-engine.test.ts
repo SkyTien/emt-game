@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ScenarioEngine } from './scenario-engine';
 import { evaluateCondition } from './condition';
-import { findPartnerActions, pickPartnerDelayMs } from './partner-ai';
+import { findPartnerActions } from './partner-ai';
 import type { Scenario } from '$lib/types/content';
 
 const baseScenario: Scenario = {
@@ -342,12 +342,6 @@ describe('findPartnerActions', () => {
 		let s = ScenarioEngine.init(baseScenario, 'assist', 0);
 		s = ScenarioEngine.performAction(s, 'check_scene_safe', 'assist', 1000).state;
 		expect(findPartnerActions(s)).toEqual(['cpr_compress_adult']);
-	});
-
-	it('uses deterministic injected timing bounds', () => {
-		expect(pickPartnerDelayMs(() => 0, 1200, 2400)).toBe(1200);
-		expect(pickPartnerDelayMs(() => 0.5, 1200, 2400)).toBe(1800);
-		expect(pickPartnerDelayMs(() => 1, 1200, 2400)).toBe(2400);
 	});
 
 	it('manual direction completes once and makes a stale callback inert', () => {

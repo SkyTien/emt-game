@@ -3,9 +3,8 @@
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
-	import { untrack } from 'svelte';
 	import { ScenarioEngine } from '$lib/engine/scenario-engine';
-	import { findPartnerActions, pickPartnerDelayMs } from '$lib/engine/partner-ai';
+	import { findPartnerActions } from '$lib/engine/partner-ai';
 	import { saveScenarioRun } from '$lib/progress/store';
 	import ActionList from '$lib/ui/ActionList.svelte';
 	import Toolbox from '$lib/ui/Toolbox.svelte';
@@ -13,10 +12,10 @@
 	import PhaseProgress from '$lib/ui/PhaseProgress.svelte';
 	import Timer from '$lib/ui/Timer.svelte';
 	import FeedbackOverlay from '$lib/ui/FeedbackOverlay.svelte';
-	import Toast from '$lib/ui/Toast.svelte';
 	import LogView from '$lib/ui/LogView.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Typewriter from '$lib/ui/Typewriter.svelte';
+	import ActorTaskLanes from '$lib/ui/ActorTaskLanes.svelte';
 	import type { ActorRole, ScenarioState, Feedback } from '$lib/engine/scenario-engine';
 	import type { Action } from '$lib/types/content';
 
@@ -38,8 +37,6 @@
 
 	let lastFeedback = $state<Feedback | null>(null);
 	let feedbackKey = $state(0);
-	let toastQueue = $state<string[]>([]);
-	let toastKey = $state(0);
 	let showLog = $state(false);
 	let narrativeFinished = $state(false);
 	let finalized = false;
@@ -117,6 +114,9 @@
 	});
 
 	const allActions = $derived(registry.all());
+	const actionLabels = $derived(
+		Object.fromEntries(allActions.map((action) => [action.id, action.label['zh-Hant']]))
+	);
 	const playerActions = $derived(
 		allActions.filter(
 			(action) =>
@@ -151,27 +151,6 @@
 		partnerActionIds.map((id) => registry.tryById(id)).filter((a): a is Action => a !== null)
 	);
 
-	// 另一位隊員會自動執行目前符合條件、且指定給他的動作。
-	$effect(() => {
-		if (!gameState || gameState.finalOutcomeId) return;
-		const pendingIds = findPartnerActions(gameState);
-		if (pendingIds.length === 0) return;
-
-		const actionId = pendingIds[0];
-		const timer = setTimeout(() => {
-			untrack(() => {
-				const action = registry.tryById(actionId);
-				if (action) {
-					toastQueue = [...toastQueue, `${$_('timeline.by_partner')}：${action.label['zh-Hant']}`];
-				}
-				const role: ActorRole = gameState.playerRole === 'lead' ? 'assist' : 'lead';
-				gameState = ScenarioEngine.performAction(gameState, actionId, role, Date.now()).state;
-			});
-		}, pickPartnerDelayMs());
-
-		return () => clearTimeout(timer);
-	});
-
 	const bagLocations = $derived(gameState?.bagLocations ?? {});
 	const sceneIllustration = $derived.by(() => {
 		const src = currentPhase?.illustration || scenario.illustration;
@@ -183,7 +162,7 @@
 		const action = registry.tryById(actionId);
 		if (!action) return;
 
-		const result = ScenarioEngine.performAction(gameState, action.id, by, Date.now());
+		const result = ScenarioEngine.requestAction(gameState, action.id, by, Date.now());
 		gameState = result.state;
 		lastFeedback = result.feedback;
 		feedbackKey += 1;
@@ -194,6 +173,20 @@
 		// until the scenario phase actually advances.
 
 		// Feedback overlay handles visual feedback display
+	}
+
+	function handleDirective(actionId: string) {
+		const result = ScenarioEngine.directivePartner(gameState, actionId, Date.now());
+		gameState = result.state;
+		lastFeedback = result.feedback;
+		feedbackKey += 1;
+	}
+
+	function cancelTask(actor: ActorRole) {
+		const result = ScenarioEngine.interruptTask(gameState, actor, 'actor_cancelled', Date.now());
+		gameState = result.state;
+		lastFeedback = result.feedback;
+		feedbackKey += 1;
 	}
 </script>
 
@@ -219,6 +212,13 @@
 						active={gameState.phaseStarted}
 					/>
 				</div>
+				<ActorTaskLanes
+					lanes={gameState.actorLanes}
+					{actionLabels}
+					{nowMs}
+					playerRole={gameState.playerRole}
+					oncancel={cancelTask}
+				/>
 			</div>
 			<button
 				class="btn-icon"
@@ -297,10 +297,7 @@
 							completedIds={gameState.completedRequiredIds}
 							{partnerActions}
 							onpick={(a) => handleAction(a.id, gameState.playerRole)}
-							ondirective={(a) => {
-								const partnerRole: ActorRole = gameState.playerRole === 'lead' ? 'assist' : 'lead';
-								handleAction(a.id, partnerRole);
-							}}
+							ondirective={(a) => handleDirective(a.id)}
 						/>
 					</div>
 				</div>
@@ -343,18 +340,6 @@
 				correct={lastFeedback.correct}
 				message={$_(`feedback.${lastFeedback.message}`)}
 				onClose={() => (lastFeedback = null)}
-			/>
-		{/key}
-	{/if}
-
-	{#if toastQueue.length > 0}
-		{#key toastKey}
-			<Toast
-				message={toastQueue[0]}
-				onClose={() => {
-					toastQueue = toastQueue.slice(1);
-					toastKey += 1;
-				}}
 			/>
 		{/key}
 	{/if}

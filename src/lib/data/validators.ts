@@ -1,5 +1,6 @@
 import type {
 	Action,
+	ActionTiming,
 	BagId,
 	CatalogMetadata,
 	LocalizedString,
@@ -148,6 +149,78 @@ function ensureBag(value: unknown, field: string, errors: ValidationError[]): Ba
 		return undefined;
 	}
 	return value as BagId;
+}
+
+const TIMING_FIELDS = new Set(['duration_seconds', 'interruptible']);
+
+function validateTiming(
+	value: unknown,
+	field: string,
+	errors: ValidationError[],
+	inherited?: ActionTiming
+): ActionTiming | undefined {
+	if (value === undefined) return inherited;
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+		pushError(errors, field, 'invalid_timing', `${field}: 必須為物件`, value);
+		return inherited;
+	}
+
+	const raw = value as Record<string, unknown>;
+	for (const key of Object.keys(raw)) {
+		if (!TIMING_FIELDS.has(key)) {
+			pushError(
+				errors,
+				`${field}.${key}`,
+				'unknown_timing_field',
+				`${field}.${key}: timing 不支援此欄位`,
+				raw[key]
+			);
+		}
+	}
+
+	const timing: ActionTiming = { ...inherited };
+	if (raw.duration_seconds !== undefined) {
+		if (
+			typeof raw.duration_seconds !== 'number' ||
+			!Number.isFinite(raw.duration_seconds) ||
+			!Number.isInteger(raw.duration_seconds) ||
+			raw.duration_seconds < 0 ||
+			raw.duration_seconds > 600
+		) {
+			pushError(
+				errors,
+				`${field}.duration_seconds`,
+				'invalid_action_duration',
+				`${field}.duration_seconds: 必須為 0–600 的整數秒`,
+				raw.duration_seconds
+			);
+		} else {
+			timing.duration_seconds = raw.duration_seconds;
+		}
+	}
+	if (raw.interruptible !== undefined) {
+		if (typeof raw.interruptible !== 'boolean') {
+			pushError(
+				errors,
+				`${field}.interruptible`,
+				'invalid_interruptible',
+				`${field}.interruptible: 必須為 boolean`,
+				raw.interruptible
+			);
+		} else {
+			timing.interruptible = raw.interruptible;
+		}
+	}
+
+	if ((timing.duration_seconds ?? 0) > 0 && timing.interruptible === undefined) {
+		pushError(
+			errors,
+			`${field}.interruptible`,
+			'missing_interruptible',
+			`${field}.interruptible: duration_seconds 大於 0 時必須明確設定`
+		);
+	}
+	return timing;
 }
 
 function validateCatalogMetadata(
@@ -305,6 +378,7 @@ export function validateActions(input: unknown): ValidationResult {
 		if (a.explain !== undefined) {
 			ensureLocalized(a.explain, `${path}.explain`, errors, warnings);
 		}
+		validateTiming(a.timing, `${path}.timing`, errors);
 	});
 
 	return { ok: errors.length === 0, errors, warnings };
@@ -339,7 +413,12 @@ function validateRequiredEntries(
 			return;
 		}
 
-		const obj = entry as { action_id?: unknown; after?: unknown; by?: unknown };
+		const obj = entry as {
+			action_id?: unknown;
+			after?: unknown;
+			by?: unknown;
+			timing?: unknown;
+		};
 		if (typeof obj.action_id !== 'string' || obj.action_id.length === 0) {
 			pushError(errors, subField, 'invalid_type', `${subField}: 必須含非空 action_id`);
 			return;
@@ -357,8 +436,9 @@ function validateRequiredEntries(
 			ensureEnum(obj.by, ['lead', 'assist'], `${subField}.by`, 'invalid_role', errors);
 
 		// Verify action exists
+		let action: Action | undefined;
 		try {
-			registry.byId(obj.action_id);
+			action = registry.byId(obj.action_id);
 		} catch {
 			pushError(
 				errors,
@@ -368,6 +448,7 @@ function validateRequiredEntries(
 				obj.action_id
 			);
 		}
+		validateTiming(obj.timing, `${subField}.timing`, errors, action?.timing);
 
 		// Verify after references an action in the same phase
 		if (obj.after !== undefined) {

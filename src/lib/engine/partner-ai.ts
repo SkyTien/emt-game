@@ -1,9 +1,8 @@
 import { ScenarioEngine, type ScenarioState } from './scenario-engine';
 
 /**
- * 同伴 AI:當 phase 中標示 by:'partner' 的 required 動作未完成,
- * 延遲 minMs~maxMs 後自動執行。純函數,只回傳「該執行什麼動作」,
- * 由 UI/timer 排程實際呼叫。
+ * 回傳當前 phase 可交由 AI 同伴執行的 required action IDs。
+ * 實際 queue、reaction time、busy state 與完成時間由 ScenarioEngine 管理。
  *
  * 返回動作 ID 列表（對應已規範化的 action_id）。
  */
@@ -30,12 +29,4 @@ export function findPlayerActions(state: ScenarioState): string[] {
 		.filter((r) => !state.completedRequiredIds.has(r.action_id))
 		.filter((r) => !r.after || state.completedRequiredIds.has(r.after))
 		.map((r) => r.action_id);
-}
-
-export function pickPartnerDelayMs(
-	rand: () => number = Math.random,
-	minMs = 1000,
-	maxMs = 3000
-): number {
-	return minMs + rand() * (maxMs - minMs);
 }

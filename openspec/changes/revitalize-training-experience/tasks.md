@@ -60,6 +60,10 @@
 
 ## 7. Future Single-Player Crew Engine
 
-- [ ] 7.1 [Phase 2] Specify action duration, interruption and actor busy-state contracts in a separate OpenSpec change
-- [ ] 7.2 [Phase 2] Implement player and AI partner task lanes as pure deterministic engine state
+- [x] 7.1 [Phase 2] Specify action duration, interruption and actor busy-state contracts in a separate OpenSpec change
+
+  Contract recorded in `openspec/changes/specify-actor-task-lanes/`.
+- [x] 7.2 [Phase 2] Implement player and AI partner task lanes as pure deterministic engine state
+
+  Implemented and verified in `openspec/changes/specify-actor-task-lanes/`.
 - [ ] 7.3 [Phase 2] Author and playtest an OHCA v2 vertical slice before migrating other scenarios

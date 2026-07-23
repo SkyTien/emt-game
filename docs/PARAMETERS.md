@@ -32,6 +32,9 @@ actions: # 陣列，所有動作定義
     body_region: <BodyRegion> #   可選，身體部位
     icon: <string> #   可選，icon 路徑
     explain: <LocalizedString> #   可選，學習說明
+    timing: #   可選，省略時維持即時完成
+      duration_seconds: <integer> # 0–600 秒
+      interruptible: <boolean> # duration > 0 時必須明確設定
 ```
 
 | 參數           | 型別                                                 | 必填 | 說明                                                      | 舉例                           |
@@ -43,6 +46,19 @@ actions: # 陣列，所有動作定義
 | `body_region`  | BodyRegion                                           |      | 操作身體部位，影響 UI 呈現（見下方）                      | `head`, `chest`                |
 | `icon`         | string                                               |      | Lucide icon 名稱或路徑                                    | `ShieldCheck`, `Activity`      |
 | `explain`      | LocalizedString                                      |      | 時間軸回顧中顯示的教學說明                                | `{ zh-Hant: 瞳孔反射檢查... }` |
+| `timing`       | ActionTiming                                         |      | 動作預設耗時與能否中止；省略時即時完成                    | 見下方                         |
+
+#### ActionTiming（動作時間）
+
+```yaml
+timing:
+  duration_seconds: 30
+  interruptible: true
+```
+
+- `duration_seconds` 必須是 0–600 的整數。省略 timing 時預設為 0，既有內容仍即時完成。
+- effective duration 大於 0 時，必須明確提供 `interruptible`。
+- 情境的 required entry 可局部覆寫 timing；未覆寫欄位沿用 action 預設。
 
 ### 有效的 BagId 值
 
@@ -221,15 +237,20 @@ phases:
 
 ```yaml
 required:
-  - { action_id: <string>, by?: <ActorRole>, set_flag?: <string> }
+  - action_id: <string>
+    by: <ActorRole> # 可選
+    set_flag: <string> # 可選
+    after: <action_id> # 可選
+    timing: <ActionTiming> # 可選，覆寫 action 預設
 ```
 
-| 欄位        | 必填 | 型別                  | 說明                                                     | 舉例                         |
-| ----------- | ---- | --------------------- | -------------------------------------------------------- | ---------------------------- |
-| `action_id` | ✓    | string                | **推薦**：對應 actions.yml 的 id                         | `assess_safety`, `cpr_adult` |
-| `action`    |      | string                | **已棄用**：中文 label（需執行遷移指令更新為 action_id） | `評估現場安全`（舊）         |
-| `by`        |      | `player` \| `partner` | 執行者限制；省略表示任何人                               | `player`, `partner`          |
-| `set_flag`  |      | string                | 完成後設定的旗標名稱，供 outcome 條件使用                | `已電擊`, `初評完成`         |
+| 欄位        | 必填 | 型別               | 說明                                             | 舉例                         |
+| ----------- | ---- | ------------------ | ------------------------------------------------ | ---------------------------- |
+| `action_id` | ✓    | string             | 對應 actions.yml 的穩定 id                       | `assess_safety`, `cpr_adult` |
+| `by`        |      | `lead` \| `assist` | 執行者限制；省略表示任一角色                     | `lead`, `assist`             |
+| `set_flag`  |      | string             | 完成後設定的旗標名稱，供 outcome 條件使用        | `已電擊`, `初評完成`         |
+| `after`     |      | action ID          | 必須先完成的同 phase 動作                        | `aed_analyze`                |
+| `timing`    |      | ActionTiming       | 覆寫 action timing；未提供的欄位沿用 action 預設 | `{ duration_seconds: 20 }`   |
 
 **舉例**（推薦用法）：
 
@@ -240,6 +261,11 @@ required:
   - { action_id: cpr_adult, by: lead } # 只有主手
   - { action_id: call_dispatch, by: assist } # 只有副手 AI
   - { action_id: aed_shock, set_flag: 已電擊 } # 完成後設旗標
+  - action_id: cpr_adult
+    by: lead
+    timing:
+      duration_seconds: 20 # 只覆寫本情境的持續時間
+      interruptible: true
 ```
 
 #### OnSkip（超時處置）

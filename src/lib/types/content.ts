@@ -36,6 +36,11 @@ export type CatalogMetadata = {
 	quick_play?: boolean;
 };
 
+export type ActionTiming = {
+	duration_seconds?: number;
+	interruptible?: boolean;
+};
+
 export type Action = {
 	id: string;
 	label: LocalizedString;
@@ -45,6 +50,7 @@ export type Action = {
 	icon?: string;
 	explain?: LocalizedString;
 	reveals?: (keyof PatientVitals)[];
+	timing?: ActionTiming;
 };
 
 export type ActionCategory = {
@@ -73,6 +79,7 @@ export type Phase = {
 		by?: 'lead' | 'assist';
 		set_flag?: string;
 		after?: string;
+		timing?: ActionTiming;
 	}[];
 	timeout?: number;
 	on_skip?: {

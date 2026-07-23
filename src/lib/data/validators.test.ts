@@ -369,3 +369,43 @@ describe('validateTechnique - action_id format', () => {
 		expect(r.errors.some((e) => e.code === 'missing_action')).toBe(true);
 	});
 });
+
+describe('timed action validation', () => {
+	it('accepts explicit timing on an action', () => {
+		const actions = structuredClone(goodActions);
+		actions[0].timing = { duration_seconds: 10, interruptible: true };
+
+		expect(validateActions(actions).ok).toBe(true);
+	});
+
+	it('rejects positive action duration without an interruption policy', () => {
+		const actions = structuredClone(goodActions);
+		actions[0].timing = { duration_seconds: 10 };
+		const result = validateActions(actions);
+
+		expect(result.errors.some((error) => error.code === 'missing_interruptible')).toBe(true);
+	});
+
+	it('rejects invalid duration bounds and unknown timing keys', () => {
+		const actions = structuredClone(goodActions);
+		actions[0].timing = {
+			duration_seconds: 601,
+			interruptible: true,
+			delay: 2
+		} as never;
+		const result = validateActions(actions);
+
+		expect(result.errors.some((error) => error.code === 'invalid_action_duration')).toBe(true);
+		expect(result.errors.some((error) => error.code === 'unknown_timing_field')).toBe(true);
+	});
+
+	it('requires an effective interruption policy for required-entry timing', () => {
+		const scenario = structuredClone(goodScenario);
+		scenario.phases[0].required[0].timing = { duration_seconds: 10 };
+		const invalid = validateScenario(scenario, makeRegistry());
+		expect(invalid.errors.some((error) => error.code === 'missing_interruptible')).toBe(true);
+
+		scenario.phases[0].required[0].timing.interruptible = false;
+		expect(validateScenario(scenario, makeRegistry()).ok).toBe(true);
+	});
+});
