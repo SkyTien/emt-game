@@ -44,18 +44,18 @@ outcomes:
       zh-Hant: 持續 CPR 送醫
     text:
       zh-Hant: 雖到院前未恢復循環，但持續高品質 CPR 與電擊讓急診有機會接手進一步搶救。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/cpr.svg
   - id: continued_cpr_poor
     when: 已電擊
     title:
       zh-Hant: 持續 CPR 但品質待加強
     text:
       zh-Hant: 有執行電擊，但 CPR 流程有延誤或中斷。請回顧時間軸找出可以改進的環節。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/cpr.svg
   - id: doa
     when: 預設
     title:
       zh-Hant: 到院前 DOA
     text:
       zh-Hant: 多項關鍵動作延誤，病人到院前無生命徵象。請檢視時間軸看哪些步驟可以更快。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/doa.svg

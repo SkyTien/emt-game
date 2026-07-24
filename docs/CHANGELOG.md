@@ -14,6 +14,7 @@
 - Playwright coverage now includes twelve critical flows across the dispatch hub, mobile navigation, YAML catalog ordering, quick play, crew roles, actionable feedback, timed OHCA, ROSC and non-ROSC outcomes, progress persistence, and reset behavior.
 - Scenario actions now support validated timing overrides, deterministic lead/assist task lanes, explicit busy and interruption states, and engine-owned AI partner queues.
 - The EMT-reviewed OHCA v2 vertical slice exercises concurrent crew work, interruptible CPR, committed AED actions, both player roles, and deterministic deadline margins.
+- Four accessible OHCA outcome illustrations now distinguish recovery, assisted ROSC, continued CPR, and DOA across the timed and narrative scenario branches.
 
 ### Fixed
 

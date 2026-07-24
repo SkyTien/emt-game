@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">現場確認死亡</title>
+  <desc id="desc">現場確認患者已無生命徵象且符合明顯死亡（DOA）。救護技術員停止急救，將急救器材整齊收至一旁，並以被單莊嚴覆蓋患者遺體，低頭默哀致敬。</desc>
+
+  <!-- Ground Line -->
+  <line x1="50" y1="390" x2="750" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Subtle Background Scene (Distant Quiet Trees or Wall Line in Light Gray) -->
+  <line x1="50" y1="330" x2="750" y2="330" stroke="#f4f4f5" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 100 330 A 40 40 0 0 1 180 330" fill="none" stroke="#f4f4f5" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 620 330 A 40 40 0 0 1 700 330" fill="none" stroke="#f4f4f5" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Patient Covered Respectfully -->
+  <!-- Patient's Exposed Head (resting peacefully, eyes closed, calm profile) -->
+  <circle cx="240" cy="300" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Peaceful closed eye and calm mouth -->
+  <line x1="233" y1="298" x2="241" y2="298" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 241 305 Q 244 306 246 304" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Pillow / Head rest -->
+  <path d="M 220 316 C 225 310, 245 310, 250 316 Z" fill="#f4f4f5" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Clean Sheet / Blanket Covering Patient up to chest -->
+  <path d="M 255 315 C 270 305, 290 305, 310 305 L 560 305 L 560 375 L 255 375 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Folds in the sheet representing the covered body contours (calm horizontal folds) -->
+  <path d="M 310 305 C 340 315, 380 315, 410 315" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 440 312 C 470 320, 500 320, 530 320" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Equipment Set Aside (Packed / Resuscitation Ceased) -->
+  <!-- Closed Medical Defibrillator/AED Box -->
+  <rect x="400" y="340" width="50" height="42" rx="4" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Handle on top -->
+  <path d="M 412 340 L 412 332 L 438 332 L 438 340" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="400" y1="352" x2="450" y2="352" stroke="#18181b" stroke-width="1.5"/>
+  <circle cx="425" cy="365" r="3" fill="#18181b"/>
+
+  <!-- Neatly Coiled BVM (Bag-Valve-Mask) -->
+  <path d="M 475 375 C 475 365, 490 365, 495 370 C 500 375, 510 375, 515 370 C 520 365, 530 370, 530 375" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 465 375 L 472 368" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- EMT 1 (Left - standing respectfully, head bowed, hands clasped) -->
+  <!-- Legs -->
+  <line x1="130" y1="285" x2="130" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="150" y1="285" x2="150" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Boots -->
+  <path d="M 120 390 L 135 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 145 390 L 160 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso -->
+  <rect x="120" y="195" width="40" height="90" rx="8" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Jacket Stripes -->
+  <path d="M 120 215 L 160 215" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 120 240 L 160 240" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 120 265 L 160 265" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arms clasped in front -->
+  <path d="M 125 210 C 130 230, 135 245, 140 252" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 155 210 C 150 230, 145 245, 140 252" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="140" cy="252" rx="6" ry="4" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- Head (Bowed forward/downcast) -->
+  <circle cx="140" cy="172" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap (Tilted down to show bow) -->
+  <path d="M 124 172 A 16 16 0 0 1 155 163 L 162 169" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye (Closed/downcast) -->
+  <line x1="142" y1="175" x2="147" y2="177" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- EMT 2 (Right - standing respectfully, head bowed, hands clasped) -->
+  <!-- Legs -->
+  <line x1="630" y1="285" x2="630" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="650" y1="285" x2="650" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Boots -->
+  <path d="M 620 390 L 635 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 645 390 L 660 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso -->
+  <rect x="620" y="195" width="40" height="90" rx="8" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Jacket Stripes -->
+  <path d="M 620 215 L 660 215" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 620 240 L 660 240" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 620 265 L 660 265" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arms clasped in front -->
+  <path d="M 625 210 C 630 230, 635 245, 640 252" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 665 210 C 660 230, 655 245, 640 252" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="640" cy="252" rx="6" ry="4" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- Head (Bowed forward/downcast) -->
+  <circle cx="640" cy="172" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap (Tilted down to show bow) -->
+  <path d="M 656 172 A 16 16 0 0 0 625 163 L 618 169" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye (Closed/downcast) -->
+  <line x1="638" y1="175" x2="633" y2="177" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+</svg>

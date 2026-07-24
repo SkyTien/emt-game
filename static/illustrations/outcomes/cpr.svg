@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">持續高品質心肺復甦術</title>
+  <desc id="desc">兩名救護技術員正協調進行高品質 CPR。一名救護員跪在患者身旁，雙手打直對胸部進行按壓，另一名救護員在頭部操作袋裝面罩進行人工呼吸，身旁備有擔架準備隨時搬運。</desc>
+
+  <!-- Ground Line -->
+  <line x1="50" y1="390" x2="750" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Nearby Stretcher in Background (Light Gray/Preparation Signifier) -->
+  <!-- Stretcher Wheels -->
+  <circle cx="530" cy="375" r="15" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+  <circle cx="670" cy="375" r="15" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+  <!-- Stretcher Legs -->
+  <line x1="530" y1="375" x2="670" y2="280" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="670" y1="375" x2="530" y2="280" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round"/>
+  <!-- Stretcher Mattress Bed -->
+  <rect x="480" y="260" width="230" height="18" rx="4" fill="none" stroke="#e4e4e7" stroke-width="2"/>
+  <path d="M 480 260 L 460 245 L 480 245 Z" fill="none" stroke="#e4e4e7" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M 710 268 L 725 268" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Patient Lying Flat -->
+  <!-- Head -->
+  <circle cx="240" cy="300" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Patient's eye (closed) -->
+  <path d="M 235 298 Q 238 301 241 298" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Torso (chest receiving compressions) -->
+  <path d="M 256 325 L 360 325 L 360 375 L 256 375 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Legs covered by sheet -->
+  <path d="M 360 325 Q 430 325 510 335 L 510 375 L 360 375 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Foot outside -->
+  <path d="M 510 355 L 522 355 L 522 348 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- EMT 2 (Left - kneeling at head, holding BVM & ventilating) -->
+  <!-- Legs kneeling -->
+  <path d="M 120 390 L 165 390 Q 180 390 170 370 L 140 320 Q 130 310 120 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Boot -->
+  <path d="M 105 390 L 125 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso (leaning forward) -->
+  <path d="M 120 320 L 140 240 Q 175 240 170 300 L 150 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Vest stripes -->
+  <path d="M 125 260 L 165 255" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 130 285 L 170 280" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arms holding BVM Mask & Bag -->
+  <!-- Left arm holding mask -->
+  <path d="M 160 255 C 180 260, 195 270, 205 285" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="205" cy="285" r="4.5" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- Right arm squeezing bag -->
+  <path d="M 150 245 C 170 245, 185 250, 195 260" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="195" cy="260" r="4.5" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- BVM Mask & Bag -->
+  <path d="M 226 290 Q 236 280 242 292 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M 198 262 C 205 255, 218 262, 225 275 L 223 277 C 215 272, 205 272, 198 262 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Head -->
+  <circle cx="145" cy="210" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap -->
+  <path d="M 129 208 A 16 16 0 0 1 161 208 L 169 208" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye -->
+  <circle cx="151" cy="210" r="1" fill="#18181b"/>
+  <path d="M 151 216 Q 153 218 155 215" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- EMT 1 (Center - kneeling next to chest, performing chest compressions) -->
+  <!-- Legs kneeling -->
+  <path d="M 365 390 L 310 390 Q 295 390 305 370 L 335 320 Q 345 310 355 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Boot -->
+  <path d="M 365 390 L 385 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso angled forward so the shoulders stay vertically above the hands -->
+  <path d="M 360 320 L 348 275 Q 340 238 315 220 L 296 212 Q 280 218 291 238 L 323 292 L 325 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Vest stripes -->
+  <path d="M 297 235 L 329 225" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 310 260 L 340 250" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Locked, straight compression arms with shoulders directly above the sternum -->
+  <line x1="296" y1="235" x2="299" y2="317" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <line x1="307" y1="237" x2="305" y2="317" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Stacked hands centered on the lower half of the sternum -->
+  <path d="M 292 321 Q 302 316 312 321" fill="#ffffff" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 294 325 Q 302 321 310 325" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Head (looking down at hands/chest) -->
+  <circle cx="279" cy="195" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap (EMT cap) -->
+  <path d="M 266 185 A 16 16 0 0 1 292 202 L 300 205" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye looking down -->
+  <circle cx="286" cy="200" r="1" fill="#18181b"/>
+  <path d="M 284 205 Q 286 207 288 205" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+</svg>

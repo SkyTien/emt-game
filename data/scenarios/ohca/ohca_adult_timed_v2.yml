@@ -238,18 +238,18 @@ outcomes:
       zh-Hant: ROSC — 雙人協作順暢
     text:
       zh-Hant: 主副手在時限內並行完成高品質 CPR、氣道通氣與 AED 電擊，病人恢復自主循環與呼吸。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/recovery.svg
   - id: timed_rosc_delayed
     when: 已電擊
     title:
       zh-Hant: ROSC — 協作節奏可再加強
     text:
       zh-Hant: 病人恢復自主循環，但部分工作延誤或中斷。請回顧兩條任務軌與時間軸。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/rosc.svg
   - id: timed_no_shock
     when: 預設
     title:
       zh-Hant: 未完成及時電擊
     text:
       zh-Hant: 關鍵處置未在時限內完成。請重新安排主副手並行工作並減少按壓中斷。
-    illustration: /illustrations/outcomes/placeholder.svg
+    illustration: /illustrations/outcomes/cpr.svg

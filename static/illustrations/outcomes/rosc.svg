@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">恢復自發性血液循環</title>
+  <desc id="desc">患者成功恢復自發性血液循環（ROSC）。一名救護技術員持續操作袋裝面罩（BVM）進行人工呼吸，另一名救護技術員則專注監測生理監視器上的心電圖。</desc>
+
+  <!-- Ground Line -->
+  <line x1="50" y1="390" x2="750" y2="390" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Subtle Background Scene Elements (Extremely Light Gray) -->
+  <!-- Simple street curb or indoor wall line -->
+  <line x1="50" y1="350" x2="750" y2="350" stroke="#f4f4f5" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Nearby emergency vehicle silhouette (very faint) -->
+  <path d="M 600 350 L 600 240 L 730 240 L 750 280 L 750 350 Z" fill="none" stroke="#f4f4f5" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="630" cy="350" r="15" fill="none" stroke="#f4f4f5" stroke-width="1.5"/>
+  <circle cx="710" cy="350" r="15" fill="none" stroke="#f4f4f5" stroke-width="1.5"/>
+
+  <!-- Patient Lying Flat -->
+  <!-- Head -->
+  <circle cx="250" cy="300" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Patient's closed eye, peaceful mouth -->
+  <path d="M 245 298 Q 248 301 251 298" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 252 305 Q 255 307 257 304" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Neck -->
+  <path d="M 258 314 L 265 330" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Torso (chest exposed for monitoring) -->
+  <path d="M 265 330 L 360 330 L 360 375 L 265 375 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Legs covered by a neat sheet/blanket -->
+  <path d="M 360 330 Q 460 325 570 340 L 570 375 L 360 375 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Foot showing outside -->
+  <path d="M 570 355 L 585 355 L 585 345 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- BVM (Bag Valve Mask) on Patient -->
+  <!-- Mask on face -->
+  <path d="M 238 290 Q 248 280 252 292 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Oxygen reservoir tubing & bag -->
+  <path d="M 210 270 Q 190 280 180 260" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Resuscitator Bag (Squeezed by EMT 1) -->
+  <path d="M 215 272 C 225 262, 240 272, 245 285 L 243 287 C 235 282, 220 282, 215 272 Z" fill="#ffffff" stroke="#18181b" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- EMT 1 (Left - kneeling at head, holding/compressing BVM) -->
+  <!-- Legs kneeling -->
+  <path d="M 130 390 L 175 390 Q 190 390 180 370 L 150 320 Q 140 310 130 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Boot -->
+  <path d="M 115 390 L 135 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso (leaning forward) -->
+  <path d="M 130 320 L 150 240 Q 185 240 180 300 L 160 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Vest Lines -->
+  <path d="M 135 260 L 175 255" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 140 285 L 180 280" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arm reaching to BVM -->
+  <path d="M 170 255 C 190 260, 205 265, 215 272" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="215" cy="272" r="4.5" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- Head -->
+  <circle cx="155" cy="210" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap -->
+  <path d="M 139 208 A 16 16 0 0 1 171 208 L 179 208" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye & focused look -->
+  <circle cx="161" cy="210" r="1" fill="#18181b"/>
+  <path d="M 161 216 Q 163 218 165 215" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Monitor (ECG/Defibrillator) on the Ground -->
+  <rect x="370" y="290" width="65" height="70" rx="6" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Screen -->
+  <rect x="375" y="296" width="55" height="40" rx="3" fill="#f4f4f5" stroke="#18181b" stroke-width="1.5"/>
+  <!-- Sinus Rhythm Pulse Wave (Green for recovery feeling) -->
+  <path d="M 377 316 L 388 316 L 391 304 L 394 328 L 397 312 L 400 316 L 410 316 L 413 304 L 416 328 L 419 312 L 422 316" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Controls/Buttons below screen -->
+  <circle cx="383" cy="348" r="3" fill="#18181b"/>
+  <circle cx="393" cy="348" r="3" fill="#18181b"/>
+  <rect x="405" y="345" width="22" height="6" rx="1" fill="#18181b"/>
+  <!-- Cable from Monitor to Patient's chest -->
+  <path d="M 370 335 C 340 345, 330 335, 310 340" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="310" cy="340" r="3" fill="#18181b"/> <!-- Electrode pad -->
+  <path d="M 370 340 C 350 360, 340 350, 325 355" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="325" cy="355" r="3" fill="#18181b"/> <!-- Second electrode pad -->
+
+  <!-- EMT 2 (Right - kneeling, observing monitor) -->
+  <!-- Legs kneeling -->
+  <path d="M 545 390 L 490 390 Q 475 390 485 370 L 515 320 Q 525 310 535 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Boot -->
+  <path d="M 545 390 L 565 390" stroke="#18181b" stroke-width="3" stroke-linecap="round"/>
+  <!-- Torso (leaning towards patient/monitor) -->
+  <path d="M 535 320 L 515 240 Q 480 240 485 300 L 505 320 Z" fill="#ffffff" stroke="#18181b" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Vest Lines -->
+  <path d="M 530 260 L 490 255" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 525 285 L 485 280" stroke="#18181b" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arm pointing to monitor / checking pulse -->
+  <path d="M 495 255 C 460 265, 450 280, 440 295" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="440" cy="295" r="4.5" fill="#ffffff" stroke="#18181b" stroke-width="2"/>
+  <!-- Head -->
+  <circle cx="510" cy="210" r="16" fill="#ffffff" stroke="#18181b" stroke-width="2.5"/>
+  <!-- Cap (EMT cap) -->
+  <path d="M 526 208 A 16 16 0 0 0 494 208 L 486 208" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Eye & interested look -->
+  <circle cx="504" cy="210" r="1" fill="#18181b"/>
+  <path d="M 503 216 Q 501 218 499 215" fill="none" stroke="#18181b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Symbol of Restored Circulation (Warm Red Heart and Ripples) -->
+  <g transform="translate(320, 190)">
+    <!-- Heart shape, filled with pale red -->
+    <path d="M 12 0 C 12 0, 0 -12, 0 -20 A 8 8 0 0 1 16 -28 A 8 8 0 0 1 32 -20 C 32 -12, 12 0, 12 0 Z" fill="#fee2e2" stroke="#18181b" stroke-width="2" stroke-linejoin="round" transform="rotate(180 16 -12)"/>
+    <!-- Concentric ripples -->
+    <path d="M -8 -15 A 14 14 0 0 0 -8 0" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round" stroke-dasharray="1,3"/>
+    <path d="M 40 -15 A 14 14 0 0 1 40 0" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round" stroke-dasharray="1,3"/>
+  </g>
+
+</svg>
