@@ -1,18 +1,18 @@
 id: ohca_adult_timed_v2
 schema_version: 1
 title:
-  zh-Hant: 路倒成人 OHCA 協作計時
+  zh-Hant: 路倒成人 OHCA 雙人協作
 illustration: /illustrations/scenes/ohca_adult_street.png
 catalog:
   summary:
-    zh-Hant: 以雙任務軌演練主副手同步 CPR、氣道處置與 AED 操作。
+    zh-Hant: 以雙任務軌演練主副手同步 CPR、氣道處置與 AED 操作；單人動作立即完成，搭檔保留反應時間。
   difficulty: advanced
-  estimated_minutes: 4
+  estimated_minutes: 3
   section:
     zh-Hant: 循環與復甦
   tags:
     - { zh-Hant: OHCA }
-    - { zh-Hant: 計時協作 }
+    - { zh-Hant: 雙人協作 }
   featured: false
   sort: 11
 player_role: either
@@ -46,20 +46,11 @@ phases:
     required:
       - action_id: check_scene_safe
         by: lead
-        timing:
-          duration_seconds: 2
-          interruptible: true
       - action_id: wear_ppe
         by: lead
         after: check_scene_safe
-        timing:
-          duration_seconds: 2
-          interruptible: true
       - action_id: call_119_dispatch
         by: assist
-        timing:
-          duration_seconds: 6
-          interruptible: true
     timeout: 25
     on_skip:
       worsen: 1
@@ -73,21 +64,12 @@ phases:
     required:
       - action_id: check_consciousness_avpu
         by: lead
-        timing:
-          duration_seconds: 3
-          interruptible: true
       - action_id: check_breath
         by: lead
         after: check_consciousness_avpu
-        timing:
-          duration_seconds: 5
-          interruptible: true
       - action_id: check_pulse_carotid
         by: lead
         after: check_breath
-        timing:
-          duration_seconds: 5
-          interruptible: true
     timeout: 30
     on_skip:
       worsen: 1
@@ -101,32 +83,17 @@ phases:
     required:
       - action_id: cpr_compress_adult
         by: lead
-        timing:
-          duration_seconds: 30
-          interruptible: true
       - action_id: open_airway_head_tilt
         by: assist
-        timing:
-          duration_seconds: 3
-          interruptible: true
       - action_id: insert_opa
         by: assist
         after: open_airway_head_tilt
-        timing:
-          duration_seconds: 5
-          interruptible: true
       - action_id: connect_o2
         by: assist
         after: insert_opa
-        timing:
-          duration_seconds: 4
-          interruptible: true
       - action_id: bvm_ventilate
         by: assist
         after: connect_o2
-        timing:
-          duration_seconds: 8
-          interruptible: true
     timeout: 45
     on_skip:
       worsen: 2
@@ -140,20 +107,11 @@ phases:
     required:
       - action_id: cpr_compress_adult
         by: lead
-        timing:
-          duration_seconds: 20
-          interruptible: true
       - action_id: aed_power_on
         by: assist
-        timing:
-          duration_seconds: 2
-          interruptible: true
       - action_id: aed_attach
         by: assist
         after: aed_power_on
-        timing:
-          duration_seconds: 8
-          interruptible: true
     timeout: 30
     on_skip:
       worsen: 2
@@ -163,20 +121,14 @@ phases:
     narrative:
       zh-Hant: 電擊片已貼妥，所有人離開病人。AED 分析顯示 VF，應確認無人接觸後完成電擊。
     hint:
-      zh-Hant: 分析與電擊時保持病人 clear；這兩項安全關鍵操作開始後不可由玩家取消。
+      zh-Hant: 分析與電擊時保持病人 clear；確認無人接觸病人後再執行電擊。
     required:
       - action_id: aed_analyze
         by: assist
-        timing:
-          duration_seconds: 5
-          interruptible: false
       - action_id: aed_shock
         by: assist
         after: aed_analyze
         set_flag: 已電擊
-        timing:
-          duration_seconds: 2
-          interruptible: false
     timeout: 20
     on_skip:
       worsen: 2
@@ -190,14 +142,8 @@ phases:
     required:
       - action_id: cpr_compress_adult
         by: lead
-        timing:
-          duration_seconds: 20
-          interruptible: true
       - action_id: bvm_ventilate
         by: assist
-        timing:
-          duration_seconds: 8
-          interruptible: true
     timeout: 30
     on_skip:
       worsen: 2
@@ -211,21 +157,12 @@ phases:
     required:
       - action_id: check_pulse_carotid
         by: lead
-        timing:
-          duration_seconds: 5
-          interruptible: true
       - action_id: check_breath
         by: lead
         after: check_pulse_carotid
-        timing:
-          duration_seconds: 5
-          interruptible: true
       - action_id: isbar_handoff
         by: lead
         after: check_breath
-        timing:
-          duration_seconds: 8
-          interruptible: true
     timeout: 30
     on_skip:
       worsen: 1

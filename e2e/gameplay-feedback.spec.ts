@@ -1,5 +1,29 @@
 import { test, expect } from '@playwright/test';
-import { chooseMode, clickAction, startScenarioAsLead } from './helpers/scenario';
+import { chooseMode, clickAction, finishNarrative, startScenarioAsLead } from './helpers/scenario';
+
+test('手機操作選單保留劇情、可明確關閉，換階段時會自動收合', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await startScenarioAsLead(page, 'ohca_rosc_breathing');
+
+	await finishNarrative(page, '你抵達現場');
+	await chooseMode(page, '患者評估');
+
+	const closePanel = page.getByRole('button', { name: '關閉操作選單' });
+	await expect(closePanel).toBeVisible();
+	await expect(page.locator('.mode-panel-header')).toContainText('你抵達現場');
+
+	await closePanel.click();
+	await expect(closePanel).toBeHidden();
+	await expect(page.locator('.narrative-static')).toContainText('你抵達現場');
+	await expect(page.getByRole('button', { name: '略過簡報' })).toBeHidden();
+
+	await chooseMode(page, '現場勘查');
+	await clickAction(page, '評估現場安全');
+	await clickAction(page, '戴手套口罩');
+
+	await finishNarrative(page, '病人臉色蒼白');
+	await expect(closePanel).toBeHidden();
+});
 
 test('略過簡報後倒數啟動，非當前處置會顯示具體回饋且不加進度', async ({ page }) => {
 	await startScenarioAsLead(page, 'ohca_rosc_breathing');

@@ -759,7 +759,9 @@ function cancelAllTasks(
 }
 
 function clonePatient(patient: PatientVitals): PatientVitals {
-	return structuredClone(patient);
+	return Object.fromEntries(
+		Object.entries(patient).map(([key, value]) => [key, { ...value }])
+	) as PatientVitals;
 }
 
 function degradePatient(patient: PatientVitals, worsen: number): void {

@@ -3,25 +3,24 @@ import { getScenarioById } from '$lib/data/content';
 import { ScenarioEngine, type ScenarioState } from './scenario-engine';
 
 const SCENARIO_ID = 'ohca_adult_timed_v2';
-const CONCURRENT_PHASES = new Set(['arrival', 'cpr_airway', 'aed_prep', 'post_shock_cpr']);
 const EXPECTED_MARGINS_MS = {
 	lead: {
-		arrival: 17_000,
-		assess: 17_000,
-		cpr_airway: 15_000,
-		aed_prep: 10_000,
-		aed_delivery: 9_000,
-		post_shock_cpr: 10_000,
-		reassess_handoff: 12_000
+		arrival: 23_000,
+		assess: 30_000,
+		cpr_airway: 37_000,
+		aed_prep: 26_000,
+		aed_delivery: 16_000,
+		post_shock_cpr: 28_000,
+		reassess_handoff: 30_000
 	},
 	assist: {
-		arrival: 17_000,
-		assess: 11_000,
-		cpr_airway: 13_000,
-		aed_prep: 8_000,
-		aed_delivery: 13_000,
-		post_shock_cpr: 8_000,
-		reassess_handoff: 6_000
+		arrival: 21_000,
+		assess: 24_000,
+		cpr_airway: 43_000,
+		aed_prep: 28_000,
+		aed_delivery: 20_000,
+		post_shock_cpr: 28_000,
+		reassess_handoff: 24_000
 	}
 } as const;
 
@@ -29,7 +28,6 @@ type PhaseResult = {
 	state: ScenarioState;
 	nowMs: number;
 	marginMs: number;
-	sawConcurrency: boolean;
 };
 
 function requiredScenario() {
@@ -46,7 +44,6 @@ function runPhase(state: ScenarioState, nowMs: number): PhaseResult {
 	const startedAtMs = nowMs;
 	const deadlineMs = startedAtMs + (phase.timeout ?? 0) * 1_000;
 	let next = ScenarioEngine.startPhase(state, nowMs);
-	let sawConcurrency = false;
 
 	for (let guard = 0; guard < 100 && next.phaseIndex === phaseIndex; guard += 1) {
 		const playerLane = next.actorLanes[next.playerRole];
@@ -67,9 +64,11 @@ function runPhase(state: ScenarioState, nowMs: number): PhaseResult {
 			);
 			expect(result.feedback.correct).toBe(true);
 			next = result.state;
+			if (next.phaseIndex === phaseIndex && next.actorLanes[next.playerRole].status === 'idle') {
+				continue;
+			}
 		}
 
-		sawConcurrency ||= Object.values(next.actorLanes).every((lane) => lane.status === 'busy');
 		if (next.phaseIndex !== phaseIndex) break;
 
 		const eventTimes = Object.values(next.actorLanes)
@@ -86,33 +85,18 @@ function runPhase(state: ScenarioState, nowMs: number): PhaseResult {
 
 		nowMs = Math.min(...eventTimes, deadlineMs);
 		next = ScenarioEngine.tick(next, nowMs);
-		sawConcurrency ||= Object.values(next.actorLanes).every((lane) => lane.status === 'busy');
 	}
 
 	if (next.phaseIndex === phaseIndex) throw new Error(`phase ${phase.id} did not settle`);
 	return {
 		state: next,
 		nowMs,
-		marginMs: deadlineMs - nowMs,
-		sawConcurrency
+		marginMs: deadlineMs - nowMs
 	};
 }
 
-function runUntilPhase(
-	state: ScenarioState,
-	targetPhaseId: string,
-	nowMs = 0
-): { state: ScenarioState; nowMs: number } {
-	while (state.scenario.phases[state.phaseIndex]?.id !== targetPhaseId) {
-		const result = runPhase(state, nowMs);
-		state = result.state;
-		nowMs = result.nowMs;
-	}
-	return { state, nowMs };
-}
-
-describe('OHCA v2 timed vertical slice', () => {
-	it('loads only scenario-local timing with the approved clinical review metadata', () => {
+describe('OHCA v2 collaboration vertical slice', () => {
+	it('keeps solo actions immediate and uses the partner lane for collaboration pacing', () => {
 		const scenario = requiredScenario();
 
 		expect(scenario.player_role).toBe('either');
@@ -120,34 +104,23 @@ describe('OHCA v2 timed vertical slice', () => {
 		expect(
 			scenario.phases
 				.flatMap((phase) => phase.required)
-				.every(
-					(required) =>
-						required.timing !== undefined &&
-						required.timing.duration_seconds !== undefined &&
-						required.timing.interruptible !== undefined
-				)
+				.every((required) => required.timing === undefined)
 		).toBe(true);
-		expect(scenario.phases.find((phase) => phase.id === 'aed_delivery')?.required).toMatchObject([
-			{ action_id: 'aed_analyze', timing: { interruptible: false } },
-			{ action_id: 'aed_shock', timing: { interruptible: false } }
-		]);
 	});
 
 	it.each(['lead', 'assist'] as const)(
-		'completes the deterministic %s flow with deadline margin and concurrent lanes',
+		'completes the deterministic %s flow with deadline margin',
 		(playerRole) => {
 			const scenario = requiredScenario();
 			let state = ScenarioEngine.init(scenario, playerRole, 0);
 			let nowMs = 0;
 			const margins = new Map<string, number>();
-			const concurrent = new Set<string>();
 
 			while (!state.finalOutcomeId) {
 				const phaseId = scenario.phases[state.phaseIndex]?.id;
 				if (!phaseId) throw new Error('scenario ended without an outcome');
 				const result = runPhase(state, nowMs);
 				margins.set(phaseId, result.marginMs);
-				if (result.sawConcurrency) concurrent.add(phaseId);
 				state = result.state;
 				nowMs = result.nowMs;
 			}
@@ -158,7 +131,6 @@ describe('OHCA v2 timed vertical slice', () => {
 			expect(state.correctActions).toBe(21);
 			expect([...margins.values()].every((margin) => margin >= 5_000)).toBe(true);
 			expect(Object.fromEntries(margins)).toEqual(EXPECTED_MARGINS_MS[playerRole]);
-			expect(concurrent).toEqual(CONCURRENT_PHASES);
 
 			const replay = (() => {
 				let replayState = ScenarioEngine.init(scenario, playerRole, 0);
@@ -174,42 +146,45 @@ describe('OHCA v2 timed vertical slice', () => {
 		}
 	);
 
-	it('allows an interruptible compression task to be cancelled without a medical mistake', () => {
+	it('completes player actions immediately without occupying the player lane', () => {
 		const scenario = requiredScenario();
-		let state = ScenarioEngine.init(scenario, 'lead', 0);
-		const reached = runUntilPhase(state, 'cpr_airway');
-		state = ScenarioEngine.startPhase(reached.state, reached.nowMs);
-		state = ScenarioEngine.requestAction(state, 'cpr_compress_adult', 'lead', reached.nowMs).state;
+		const state = ScenarioEngine.startPhase(ScenarioEngine.init(scenario, 'lead', 0), 0);
+		const result = ScenarioEngine.requestAction(state, 'check_scene_safe', 'lead', 0);
 
-		const interrupted = ScenarioEngine.interruptTask(
-			state,
-			'lead',
-			'actor_cancelled',
-			reached.nowMs + 1_000
-		);
-
-		expect(interrupted.feedback.message).toBe('task_interrupted');
-		expect(interrupted.state.actorLanes.lead.status).toBe('idle');
-		expect(interrupted.state.correctActions).toBe(state.correctActions);
-		expect(interrupted.state.wrongActions).toBe(0);
+		expect(result.feedback.message).toBe('ok');
+		expect(result.state.completedRequiredIds.has('check_scene_safe')).toBe(true);
+		expect(result.state.actorLanes.lead.status).toBe('idle');
 	});
 
-	it('keeps AED analysis busy when the player requests cancellation', () => {
+	it('retains a short reaction wait for actions performed by the partner', () => {
 		const scenario = requiredScenario();
-		let state = ScenarioEngine.init(scenario, 'assist', 0);
-		const reached = runUntilPhase(state, 'aed_delivery');
-		state = ScenarioEngine.startPhase(reached.state, reached.nowMs);
-		state = ScenarioEngine.requestAction(state, 'aed_analyze', 'assist', reached.nowMs).state;
+		const state = ScenarioEngine.startPhase(ScenarioEngine.init(scenario, 'lead', 0), 0);
 
-		const interrupted = ScenarioEngine.interruptTask(
-			state,
-			'assist',
-			'actor_cancelled',
-			reached.nowMs + 1_000
+		expect(state.actorLanes.assist.task).toMatchObject({
+			actionId: 'call_119_dispatch',
+			status: 'queued',
+			readyAtMs: 2_000
+		});
+		expect(ScenarioEngine.tick(state, 1_999).completedRequiredIds.has('call_119_dispatch')).toBe(
+			false
 		);
+		expect(ScenarioEngine.tick(state, 2_000).completedRequiredIds.has('call_119_dispatch')).toBe(
+			true
+		);
+	});
 
-		expect(interrupted.feedback.message).toBe('not_interruptible');
-		expect(interrupted.state).toBe(state);
-		expect(interrupted.state.actorLanes.assist.status).toBe('busy');
+	it('advances on timeout when patient state is wrapped in a reactive proxy', () => {
+		const scenario = requiredScenario();
+		const started = ScenarioEngine.startPhase(ScenarioEngine.init(scenario, 'lead', 0), 0);
+		const state = {
+			...started,
+			patient: new Proxy(started.patient, {})
+		};
+
+		const timedOut = ScenarioEngine.tick(state, 25_000);
+
+		expect(timedOut.scenario.phases[timedOut.phaseIndex]?.id).toBe('assess');
+		expect(timedOut.phaseStarted).toBe(false);
+		expect(timedOut.worsenLevel).toBe(1);
 	});
 });

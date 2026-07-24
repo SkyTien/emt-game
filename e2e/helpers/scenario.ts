@@ -1,16 +1,16 @@
 import { expect, type Page } from '@playwright/test';
 
 export async function finishNarrative(page: Page, expectedText: string) {
-	const typewriter = page.locator('.typewriter-text');
-	await expect(typewriter).toBeVisible({ timeout: 10_000 });
+	const narrative = page.locator('.typewriter-text, .narrative-static');
+	await expect(narrative.first()).toBeVisible({ timeout: 10_000 });
 
 	await expect(async () => {
-		const currentSkip = typewriter.getByRole('button', { name: '略過簡報' });
+		const currentSkip = page.getByRole('button', { name: '略過簡報' });
 		if (await currentSkip.isVisible()) await currentSkip.click();
-		expect(await typewriter.textContent()).toContain(expectedText);
+		await expect(narrative.filter({ hasText: expectedText }).first()).toBeVisible();
 	}).toPass({ timeout: 15_000, intervals: [100, 250, 500] });
 
-	const skip = typewriter.getByRole('button', { name: '略過簡報' });
+	const skip = page.getByRole('button', { name: '略過簡報' });
 	await expect(skip).toBeHidden();
 }
 

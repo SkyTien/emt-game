@@ -53,6 +53,14 @@
 		}
 	}
 
+	function closeMode() {
+		activeMode = null;
+	}
+
+	function handleWindowKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && activeMode !== null) closeMode();
+	}
+
 	const currentPhase = $derived(gameState ? ScenarioEngine.currentPhase(gameState) : null);
 	const doneRequired = $derived(gameState?.completedRequiredIds.size ?? 0);
 	const totalRequired = $derived(currentPhase?.required.length ?? 0);
@@ -65,12 +73,15 @@
 		// Detect phase changes to show the new phase narrative
 		if (gameState && gameState.phaseIndex !== lastPhaseIndex) {
 			lastPhaseIndex = gameState.phaseIndex;
+			narrativeFinished = false;
+			activeMode = null;
 			currentNarrative = currentPhase?.narrative['zh-Hant'] ?? $_('scenario.narrative_initial');
 			narrativeId++;
 		}
 	});
 
 	function finishNarrative() {
+		if (narrativeFinished) return;
 		narrativeFinished = true;
 		gameState = ScenarioEngine.startPhase(gameState, Date.now());
 	}
@@ -104,13 +115,6 @@
 			})
 		);
 		goto(`${base}/scenarios/${scenario.id}/result`);
-	});
-
-	$effect(() => {
-		// Reset narrative finished state and active mode when the narrative block changes
-		const _ = narrativeId;
-		narrativeFinished = false;
-		activeMode = null;
 	});
 
 	const allActions = $derived(registry.all());
@@ -198,6 +202,8 @@
 	}
 </script>
 
+<svelte:window onkeydown={handleWindowKeydown} />
+
 <svelte:head>
 	<title>{scenario.title['zh-Hant']} - EMT Training</title>
 </svelte:head>
@@ -262,51 +268,64 @@
 				<div class="mode-panel scene-panel" in:fade={{ duration: 150 }}>
 					<div class="scene-spacer"></div>
 					<div class="narrative-box glass-panel">
-						{#key narrativeId}
-							<Typewriter text={currentNarrative} speed={40} onfinish={finishNarrative} />
-						{/key}
+						{#if narrativeFinished}
+							<div class="narrative-static" aria-live="polite">
+								<Icon name="MessageSquareText" size={20} />
+								<span>{currentNarrative}</span>
+							</div>
+						{:else}
+							{#key narrativeId}
+								<Typewriter text={currentNarrative} speed={40} onfinish={finishNarrative} />
+							{/key}
+						{/if}
 					</div>
 				</div>
-			{:else if activeMode === 'scene'}
-				<!-- Scene Tab Opened: structurally identical to Assessment and Toolbox -->
+			{:else}
 				<div class="mode-panel glass-panel fill" in:fade={{ duration: 150 }}>
-					<div class="patient-status-wrapper scene-narrative-top">
-						<Icon name="MessageSquareText" size={20} />
-						<span>{currentNarrative}</span>
+					<div class="mode-panel-header">
+						<div class="scene-narrative-top" aria-live="polite">
+							<Icon name="MessageSquareText" size={20} />
+							<span>{currentNarrative}</span>
+						</div>
+						<button
+							type="button"
+							class="mode-close"
+							onclick={closeMode}
+							aria-label={$_('scenario.close_panel')}
+							title={$_('scenario.close_panel')}
+						>
+							<Icon name="X" size={20} />
+						</button>
 					</div>
-					<div class="panel-content">
-						{#if narrativeFinished}
+
+					{#if activeMode === 'assessment'}
+						<PatientStatus patient={gameState.patient} revealed={gameState.revealedVitals} />
+					{/if}
+
+					<div class="panel-content" class:toolbox-pad={activeMode === 'toolbox'}>
+						{#if activeMode === 'scene'}
 							<ActionList
 								mode="list"
 								actions={sceneActions}
 								completedIds={gameState.completedRequiredIds}
 								onAction={(id) => handleAction(id, gameState.playerRole)}
 							/>
+						{:else if activeMode === 'assessment'}
+							<ActionList
+								actions={assessmentActions}
+								completedIds={gameState.completedRequiredIds}
+								onAction={(id) => handleAction(id, gameState.playerRole)}
+							/>
+						{:else}
+							<Toolbox
+								registry={playerRegistry}
+								{bagLocations}
+								completedIds={gameState.completedRequiredIds}
+								{partnerActions}
+								onpick={(a) => handleAction(a.id, gameState.playerRole)}
+								ondirective={(a) => handleDirective(a.id)}
+							/>
 						{/if}
-					</div>
-				</div>
-			{:else if activeMode === 'assessment'}
-				<div class="mode-panel glass-panel fill" in:fade={{ duration: 150 }}>
-					<PatientStatus patient={gameState.patient} revealed={gameState.revealedVitals} />
-					<div class="panel-content">
-						<ActionList
-							actions={assessmentActions}
-							completedIds={gameState.completedRequiredIds}
-							onAction={(id) => handleAction(id, gameState.playerRole)}
-						/>
-					</div>
-				</div>
-			{:else if activeMode === 'toolbox'}
-				<div class="mode-panel glass-panel fill" in:fade={{ duration: 150 }}>
-					<div class="panel-content toolbox-pad">
-						<Toolbox
-							registry={playerRegistry}
-							{bagLocations}
-							completedIds={gameState.completedRequiredIds}
-							{partnerActions}
-							onpick={(a) => handleAction(a.id, gameState.playerRole)}
-							ondirective={(a) => handleDirective(a.id)}
-						/>
 					</div>
 				</div>
 			{/if}
@@ -316,25 +335,31 @@
 	<!-- 底部導覽列 -->
 	<nav class="bottom-nav" class:disabled={!narrativeFinished}>
 		<button
+			type="button"
 			class="nav-item"
 			class:active={activeMode === 'scene'}
 			onclick={() => narrativeFinished && toggleMode('scene')}
+			aria-pressed={activeMode === 'scene'}
 		>
 			<Icon name="Search" size={24} />
 			<span>{$_('scenario.tab_scene')}</span>
 		</button>
 		<button
+			type="button"
 			class="nav-item"
 			class:active={activeMode === 'assessment'}
 			onclick={() => narrativeFinished && toggleMode('assessment')}
+			aria-pressed={activeMode === 'assessment'}
 		>
 			<Icon name="ScanFace" size={24} />
 			<span>{$_('scenario.tab_assessment')}</span>
 		</button>
 		<button
+			type="button"
 			class="nav-item"
 			class:active={activeMode === 'toolbox'}
 			onclick={() => narrativeFinished && toggleMode('toolbox')}
+			aria-pressed={activeMode === 'toolbox'}
 		>
 			<Icon name="BriefcaseMedical" size={24} />
 			<span>{$_('scenario.tab_toolbox')}</span>
@@ -531,15 +556,44 @@
 		flex: 1;
 	}
 	.scene-narrative-top {
-		padding: 0.75rem 1rem;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		background: rgba(255, 255, 255, 0.05);
+		min-width: 0;
+		flex: 1;
 		font-weight: 500;
-		font-size: 1.05rem;
+		font-size: 0.95rem;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
 		color: #fbd38d;
+	}
+	.scene-narrative-top span {
+		min-width: 0;
+		line-height: 1.45;
+	}
+	.mode-panel-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.65rem 0.75rem 0.65rem 1rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.05);
+		flex: 0 0 auto;
+	}
+	.mode-close {
+		width: 44px;
+		height: 44px;
+		flex: 0 0 44px;
+		display: grid;
+		place-items: center;
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		border-radius: 12px;
+		background: rgba(7, 19, 31, 0.55);
+		color: #f8fafc;
+		cursor: pointer;
+	}
+	.mode-close:hover,
+	.mode-close:focus-visible {
+		background: rgba(255, 255, 255, 0.12);
+		border-color: rgba(255, 255, 255, 0.32);
 	}
 	.narrative-box {
 		pointer-events: auto;
@@ -548,6 +602,16 @@
 		font-size: 1.1rem;
 		line-height: 1.6;
 		color: #f8fafc;
+	}
+	.narrative-static {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+	.narrative-static :global(svg) {
+		flex: 0 0 auto;
+		margin-top: 0.15rem;
+		color: #fbd38d;
 	}
 	/* 狀態區塊 */
 	:global(.patient-status-wrapper) {
