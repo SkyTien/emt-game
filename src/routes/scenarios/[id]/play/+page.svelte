@@ -117,9 +117,17 @@
 	const actionLabels = $derived(
 		Object.fromEntries(allActions.map((action) => [action.id, action.label['zh-Hant']]))
 	);
+	const assignedPlayerActionIds = $derived(
+		new Set(
+			currentPhase?.required
+				.filter((required) => required.by === gameState.playerRole)
+				.map((required) => required.action_id) ?? []
+		)
+	);
 	const playerActions = $derived(
 		allActions.filter(
 			(action) =>
+				assignedPlayerActionIds.has(action.id) ||
 				!action.default_role ||
 				action.default_role === 'either' ||
 				action.default_role === gameState.playerRole

@@ -22,7 +22,7 @@ export async function chooseMode(page: Page, label: string) {
 }
 
 export async function clickAction(page: Page, label: string) {
-	await page.getByRole('button', { name: label }).first().click();
+	await page.getByRole('button', { name: label, exact: true }).first().click();
 }
 
 export async function assessmentAction(
@@ -38,13 +38,17 @@ export async function assessmentAction(
 	await clickAction(page, label);
 }
 
-export async function startScenarioAsLead(page: Page, scenarioId: string) {
+export async function startScenarioAsRole(page: Page, scenarioId: string, role: '主手' | '副手') {
 	await page.addInitScript(() => {
 		Math.random = () => 0;
 	});
 	await page.goto(`/scenarios/${scenarioId}/role`);
-	await page.getByRole('button', { name: '主手' }).click();
+	await page.getByRole('button', { name: role }).click();
 	await expect(page).toHaveURL(new RegExp(`/scenarios/${scenarioId}/play`));
+}
+
+export async function startScenarioAsLead(page: Page, scenarioId: string) {
+	await startScenarioAsRole(page, scenarioId, '主手');
 }
 
 export async function completeSharedOhcaPhases(page: Page) {

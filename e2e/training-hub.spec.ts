@@ -54,12 +54,14 @@ test('情境目錄依 YAML 排序顯示難度、時間與快速出勤', async ({
 
 	const fixed = page.getByRole('region', { name: '固定情境' });
 	const cards = fixed.getByRole('link');
-	await expect(cards).toHaveCount(2);
-	await expect(cards.nth(0)).toContainText('交通事故救護');
+	await expect(cards).toHaveCount(3);
+	await expect(cards.nth(0)).toContainText('路倒成人 OHCA 協作計時');
 	await expect(cards.nth(0)).toContainText('進階');
-	await expect(cards.nth(0)).toContainText('約 7 分鐘');
-	await expect(cards.nth(1)).toContainText('室內長者救護');
-	await expect(cards.nth(1)).toContainText('基礎');
+	await expect(cards.nth(0)).toContainText('約 4 分鐘');
+	await expect(cards.nth(1)).toContainText('交通事故救護');
+	await expect(cards.nth(1)).toContainText('約 7 分鐘');
+	await expect(cards.nth(2)).toContainText('室內長者救護');
+	await expect(cards.nth(2)).toContainText('基礎');
 });
 
 test('快速出勤只會進入已登錄的 OHCA 變體簡報', async ({ page }) => {

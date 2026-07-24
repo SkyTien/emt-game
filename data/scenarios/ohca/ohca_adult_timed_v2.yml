@@ -1,0 +1,255 @@
+id: ohca_adult_timed_v2
+schema_version: 1
+title:
+  zh-Hant: 路倒成人 OHCA 協作計時
+illustration: /illustrations/scenes/ohca_adult_street.png
+catalog:
+  summary:
+    zh-Hant: 以雙任務軌演練主副手同步 CPR、氣道處置與 AED 操作。
+  difficulty: advanced
+  estimated_minutes: 4
+  section:
+    zh-Hant: 循環與復甦
+  tags:
+    - { zh-Hant: OHCA }
+    - { zh-Hant: 計時協作 }
+  featured: false
+  sort: 11
+player_role: either
+patient_initial:
+  consciousness:
+    zh-Hant: 無反應
+  breath:
+    zh-Hant: 偶發喘息
+  pulse:
+    zh-Hant: 摸不到
+crew:
+  lead:
+    role: lead
+    carries: []
+    duty:
+      zh-Hant: 現場評估、胸外按壓、ROSC 再評估與 ISBAR 交班
+  assist:
+    role: assist
+    carries:
+      - o2kit
+      - jumpkit
+      - aed
+    duty:
+      zh-Hant: 通報 119、氣道與 BVM、AED 操作
+phases:
+  - id: arrival
+    narrative:
+      zh-Hant: 你與搭檔抵達公園步道，一名中年男性倒臥地面且無明顯動作。兩人需立即分工確認安全、完成 BSI 並通報。
+    hint:
+      zh-Hant: 主手依序確認現場安全與 BSI；副手可同時通報 119。
+    required:
+      - action_id: check_scene_safe
+        by: lead
+        timing:
+          duration_seconds: 2
+          interruptible: true
+      - action_id: wear_ppe
+        by: lead
+        after: check_scene_safe
+        timing:
+          duration_seconds: 2
+          interruptible: true
+      - action_id: call_119_dispatch
+        by: assist
+        timing:
+          duration_seconds: 6
+          interruptible: true
+    timeout: 25
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: 現場安全、BSI 或通報延誤，增加救護風險並拖慢後續處置。
+  - id: assess
+    narrative:
+      zh-Hant: 病人臉色蒼白、嘴唇發紺，對呼喚沒有反應。主手需快速確認意識、呼吸與頸動脈脈搏。
+    hint:
+      zh-Hant: 先以 AVPU 評估意識，再確認呼吸與頸動脈脈搏；脈搏判斷不可超過 10 秒。
+    required:
+      - action_id: check_consciousness_avpu
+        by: lead
+        timing:
+          duration_seconds: 3
+          interruptible: true
+      - action_id: check_breath
+        by: lead
+        after: check_consciousness_avpu
+        timing:
+          duration_seconds: 5
+          interruptible: true
+      - action_id: check_pulse_carotid
+        by: lead
+        after: check_breath
+        timing:
+          duration_seconds: 5
+          interruptible: true
+    timeout: 30
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: OHCA 判斷延誤，未能儘快開始高品質 CPR。
+  - id: cpr_airway
+    narrative:
+      zh-Hant: 病人無正常呼吸且無脈搏。主手立即壓胸；副手同步暢通氣道、置入 OPA、接上氧氣並開始 BVM 通氣。
+    hint:
+      zh-Hant: 兩人應同時工作；主手持續高品質按壓，副手依序完成氣道與通氣準備。
+    required:
+      - action_id: cpr_compress_adult
+        by: lead
+        timing:
+          duration_seconds: 30
+          interruptible: true
+      - action_id: open_airway_head_tilt
+        by: assist
+        timing:
+          duration_seconds: 3
+          interruptible: true
+      - action_id: insert_opa
+        by: assist
+        after: open_airway_head_tilt
+        timing:
+          duration_seconds: 5
+          interruptible: true
+      - action_id: connect_o2
+        by: assist
+        after: insert_opa
+        timing:
+          duration_seconds: 4
+          interruptible: true
+      - action_id: bvm_ventilate
+        by: assist
+        after: connect_o2
+        timing:
+          duration_seconds: 8
+          interruptible: true
+    timeout: 45
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 胸外按壓或有效通氣延誤，降低復甦品質。
+  - id: aed_prep
+    narrative:
+      zh-Hant: AED 已送到病人身旁。主手維持按壓，副手同時開機並貼妥電擊片。
+    hint:
+      zh-Hant: AED 準備期間持續壓胸，盡量縮短分析前的無按壓時間。
+    required:
+      - action_id: cpr_compress_adult
+        by: lead
+        timing:
+          duration_seconds: 20
+          interruptible: true
+      - action_id: aed_power_on
+        by: assist
+        timing:
+          duration_seconds: 2
+          interruptible: true
+      - action_id: aed_attach
+        by: assist
+        after: aed_power_on
+        timing:
+          duration_seconds: 8
+          interruptible: true
+    timeout: 30
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: AED 準備延誤，錯失及早分析與電擊的機會。
+  - id: aed_delivery
+    narrative:
+      zh-Hant: 電擊片已貼妥，所有人離開病人。AED 分析顯示 VF，應確認無人接觸後完成電擊。
+    hint:
+      zh-Hant: 分析與電擊時保持病人 clear；這兩項安全關鍵操作開始後不可由玩家取消。
+    required:
+      - action_id: aed_analyze
+        by: assist
+        timing:
+          duration_seconds: 5
+          interruptible: false
+      - action_id: aed_shock
+        by: assist
+        after: aed_analyze
+        set_flag: 已電擊
+        timing:
+          duration_seconds: 2
+          interruptible: false
+    timeout: 20
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 未能安全且及時完成分析與電擊，VF 持續。
+  - id: post_shock_cpr
+    narrative:
+      zh-Hant: 電擊完成後，不等待脈搏檢查。主手立即恢復胸外按壓，副手同步持續 BVM 通氣。
+    hint:
+      zh-Hant: 電擊後立即恢復 CPR，避免不必要的按壓中斷。
+    required:
+      - action_id: cpr_compress_adult
+        by: lead
+        timing:
+          duration_seconds: 20
+          interruptible: true
+      - action_id: bvm_ventilate
+        by: assist
+        timing:
+          duration_seconds: 8
+          interruptible: true
+    timeout: 30
+    on_skip:
+      worsen: 2
+      note:
+        zh-Hant: 電擊後未立即恢復 CPR，增加無灌流時間。
+  - id: reassess_handoff
+    narrative:
+      zh-Hant: 完成一輪 CPR 後，病人出現規律頸動脈搏動與自主呼吸。主手快速再評估並完成 ISBAR 交班。
+    hint:
+      zh-Hant: 依序確認頸動脈與自主呼吸，再向接手團隊完成 ISBAR 交班。
+    required:
+      - action_id: check_pulse_carotid
+        by: lead
+        timing:
+          duration_seconds: 5
+          interruptible: true
+      - action_id: check_breath
+        by: lead
+        after: check_pulse_carotid
+        timing:
+          duration_seconds: 5
+          interruptible: true
+      - action_id: isbar_handoff
+        by: lead
+        after: check_breath
+        timing:
+          duration_seconds: 8
+          interruptible: true
+    timeout: 30
+    on_skip:
+      worsen: 1
+      note:
+        zh-Hant: ROSC 再評估或交班延誤，接續照護資訊不完整。
+outcomes:
+  - id: timed_rosc
+    when: 已電擊 且 惡化等級<1 且 正確率>=0.85
+    title:
+      zh-Hant: ROSC — 雙人協作順暢
+    text:
+      zh-Hant: 主副手在時限內並行完成高品質 CPR、氣道通氣與 AED 電擊，病人恢復自主循環與呼吸。
+    illustration: /illustrations/outcomes/placeholder.svg
+  - id: timed_rosc_delayed
+    when: 已電擊
+    title:
+      zh-Hant: ROSC — 協作節奏可再加強
+    text:
+      zh-Hant: 病人恢復自主循環，但部分工作延誤或中斷。請回顧兩條任務軌與時間軸。
+    illustration: /illustrations/outcomes/placeholder.svg
+  - id: timed_no_shock
+    when: 預設
+    title:
+      zh-Hant: 未完成及時電擊
+    text:
+      zh-Hant: 關鍵處置未在時限內完成。請重新安排主副手並行工作並減少按壓中斷。
+    illustration: /illustrations/outcomes/placeholder.svg

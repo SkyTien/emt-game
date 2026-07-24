@@ -11,8 +11,9 @@
 - Training entry routes now use a responsive dispatch-center design with featured dispatch, progress summary, scenario cards, skill sections, and a crew briefing page.
 - Scenario and technique YAML support optional validated `catalog` metadata for summary, difficulty, duration, section, tags, ordering, featured content, and data-driven quick-play groups.
 - Scenario HUD now exposes the active countdown, narration can be skipped in one action, and engine feedback codes render specific player guidance.
-- Playwright coverage now includes ten critical flows across the dispatch hub, mobile navigation, YAML catalog ordering, quick play, crew roles, actionable feedback, ROSC and non-ROSC outcomes, progress persistence, and reset behavior.
+- Playwright coverage now includes twelve critical flows across the dispatch hub, mobile navigation, YAML catalog ordering, quick play, crew roles, actionable feedback, timed OHCA, ROSC and non-ROSC outcomes, progress persistence, and reset behavior.
 - Scenario actions now support validated timing overrides, deterministic lead/assist task lanes, explicit busy and interruption states, and engine-owned AI partner queues.
+- The EMT-reviewed OHCA v2 vertical slice exercises concurrent crew work, interruptible CPR, committed AED actions, both player roles, and deterministic deadline margins.
 
 ### Fixed
 
@@ -24,7 +25,7 @@
 - GitHub Pages builds use base-aware navigation/assets and a `404.html` SPA fallback for dynamic-route reloads.
 - Lucide icons now use a curated named-import registry, removing the oversized shared bundle while preserving content-authored icon names.
 - Scenario partner execution no longer depends on route-owned random timers; task starts, completions, deadline ties, and stale cancellation are pure engine transitions.
-- Remaining Phase 2 follow-up includes the EMT-reviewed OHCA v2 timed vertical slice, replacing placeholder illustrations, and broader clinical review.
+- Remaining Phase 2 follow-up includes replacing placeholder illustrations and broader clinical review before migrating timed task lanes to other scenarios.
 
 ---
 

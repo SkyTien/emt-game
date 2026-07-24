@@ -19,8 +19,15 @@
 
 ## 3. OHCA v2 Vertical Slice
 
-- [ ] 3.1 [Phase 2] Have an EMT reviewer approve timed OHCA actions and interruption expectations before authoring
-- [ ] 3.2 [Phase 2] Author one OHCA v2 scenario that exercises concurrent lead and assist lanes
-- [ ] 3.3 [Phase 2] Add deterministic engine and Playwright coverage for the complete timed flow
-- [ ] 3.4 [Phase 2] Playtest mobile pacing, partner clarity, deadline fairness, and interruption feedback
-- [ ] 3.5 [Phase 2] Decide whether to revise the contract before migrating any other scenario
+- [x] 3.1 [Phase 2] Have an EMT reviewer approve timed OHCA actions and interruption expectations before authoring
+
+  Approved by Tien (EMT-1) on 2026-07-24 and recorded in
+  `docs/reviews/ohca-v2-timing-review.md`.
+
+- [x] 3.2 [Phase 2] Author one OHCA v2 scenario that exercises concurrent lead and assist lanes
+- [x] 3.3 [Phase 2] Add deterministic engine and Playwright coverage for the complete timed flow
+- [x] 3.4 [Phase 2] Playtest mobile pacing, partner clarity, deadline fairness, and interruption feedback
+- [x] 3.5 [Phase 2] Decide whether to revise the contract before migrating any other scenario
+
+  The current contract is retained. Automated desktop/mobile playtest evidence and the decision
+  are recorded in `docs/reviews/ohca-v2-playtest.md`.
